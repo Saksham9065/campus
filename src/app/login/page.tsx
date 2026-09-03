@@ -49,10 +49,13 @@ export default function LoginPage() {
 
     try {
       setLoading(true);
+      console.log("Login: starting login", email);
 
       const user = await loginUser(email, password);
+      console.log("Login: auth successful", user.uid);
 
       const profile = await getUserProfile(user.uid);
+      console.log("Login: profile loaded", profile);
 
       if (!profile) {
         setError(
@@ -61,12 +64,17 @@ export default function LoginPage() {
         return;
       }
 
-      router.replace(roleRedirects[profile.role] || "/dashboard");
+      const target = roleRedirects[profile.role] || "/dashboard";
+      console.log("Login: redirecting to", target, "role:", profile.role);
+      router.replace(target);
+      console.log("Login: redirect called");
     } catch (error: unknown) {
       const message =
         error instanceof Error
           ? error.message
           : "Unable to sign in. Please try again.";
+
+      console.error("Login error:", message);
 
       if (message.includes("auth/invalid-credential")) {
         setError("Incorrect email or password.");
@@ -79,7 +87,7 @@ export default function LoginPage() {
           "Too many attempts. Please wait a while and try again."
         );
       } else {
-        setError("Unable to sign in. Please try again.");
+        setError(message || "Unable to sign in. Please try again.");
       }
     } finally {
       setLoading(false);
