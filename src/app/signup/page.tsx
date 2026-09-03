@@ -166,21 +166,7 @@ export default function SignupPage() {
 
       console.error("Signup error:", rawError);
 
-      if (rawError.includes("auth/email-already-in-use")) {
-        setError(
-          "An account already exists with this email. Please sign in."
-        );
-      } else if (rawError.includes("auth/invalid-email")) {
-        setError("Please enter a valid email address.");
-      } else if (rawError.includes("auth/weak-password")) {
-        setError("Please choose a stronger password.");
-      } else if (rawError.includes("permission-denied")) {
-        setError(
-          "Permission denied. Please check Firestore security rules."
-        );
-      } else {
-        setError(rawError || "Unable to create your account. Please try again.");
-      }
+      setError(rawError || "Unable to create your account. Please try again.");
     } finally {
       setLoading(false);
     }
