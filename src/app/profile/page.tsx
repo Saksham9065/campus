@@ -143,7 +143,7 @@ function ProfileContent() {
         <div className="mt-8 grid gap-6 lg:grid-cols-[260px_1fr]">
           {/* Profile card */}
           <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-blue-500 text-2xl font-bold text-white shadow-lg shadow-indigo-500/20">
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-indigo-600 to-blue-500 text-2xl font-bold text-white shadow-lg shadow-indigo-500/20">
               {initials}
             </div>
 

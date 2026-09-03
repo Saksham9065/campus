@@ -112,12 +112,14 @@ export default function SignupPage() {
 
     try {
       setLoading(true);
+      console.log("Signup: starting registration");
 
       const firebaseUser = await registerUser(
         name.trim(),
         email.trim(),
         password
       );
+      console.log("Signup: auth user created", firebaseUser.uid);
 
       const profile: CampusUser = {
         uid: firebaseUser.uid,
@@ -148,6 +150,7 @@ export default function SignupPage() {
       }
 
       await createUserProfile(profile);
+      console.log("Signup: profile saved");
 
       const redirects: Record<UserRole, string> = {
         student: "/dashboard",
@@ -157,7 +160,10 @@ export default function SignupPage() {
         admin: "/admin",
       };
 
-      router.replace(redirects[role]);
+      const target = redirects[role];
+      console.log("Signup: redirecting to", target);
+      router.replace(target);
+      console.log("Signup: redirect called");
     } catch (error: unknown) {
       const rawError =
         error instanceof Error
@@ -165,7 +171,6 @@ export default function SignupPage() {
           : "Unable to create your account.";
 
       console.error("Signup error:", rawError);
-
       setError(rawError || "Unable to create your account. Please try again.");
     } finally {
       setLoading(false);
