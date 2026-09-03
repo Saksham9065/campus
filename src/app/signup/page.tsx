@@ -159,31 +159,27 @@ export default function SignupPage() {
 
       router.replace(redirects[role]);
     } catch (error: unknown) {
-      const message =
+      const rawError =
         error instanceof Error
           ? error.message
           : "Unable to create your account.";
 
-      console.error("Signup error:", error);
+      console.error("Signup error:", rawError);
 
-      if (message.includes("auth/email-already-in-use")) {
+      if (rawError.includes("auth/email-already-in-use")) {
         setError(
           "An account already exists with this email. Please sign in."
         );
-      } else if (message.includes("auth/invalid-email")) {
+      } else if (rawError.includes("auth/invalid-email")) {
         setError("Please enter a valid email address.");
-      } else if (message.includes("auth/weak-password")) {
+      } else if (rawError.includes("auth/weak-password")) {
         setError("Please choose a stronger password.");
-      } else if (message.includes("permission-denied")) {
+      } else if (rawError.includes("permission-denied")) {
         setError(
           "Permission denied. Please check Firestore security rules."
         );
       } else {
-        setError(
-          "Unable to create your account. Please try again."
-        );
-
-        console.error("Signup error details:", message);
+        setError(rawError || "Unable to create your account. Please try again.");
       }
     } finally {
       setLoading(false);
