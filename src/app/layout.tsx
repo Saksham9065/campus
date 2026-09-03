@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "CampusLink — Skill Intelligence Platform",
   description:
     "AI-powered platform connecting students, academia, institutions and industry.",
+  icons: {
+    icon: "/logo/logo.png",
+  },
 };
 
 export default function RootLayout({

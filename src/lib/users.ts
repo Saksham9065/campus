@@ -1,6 +1,6 @@
 import {
   doc,
-  getDoc,
+  getDocFromServer,
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
@@ -28,7 +28,7 @@ export async function getUserProfile(
 ): Promise<CampusUser | null> {
   const userRef = doc(db, "users", uid);
 
-  const snapshot = await getDoc(userRef);
+  const snapshot = await getDocFromServer(userRef);
 
   if (!snapshot.exists()) {
     return null;

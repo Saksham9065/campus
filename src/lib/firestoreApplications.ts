@@ -132,15 +132,21 @@ export function subscribeToStudentApplications(
     orderBy("appliedAt", "desc")
   );
 
-  return onSnapshot(q, (snapshot) => {
-    const applications =
-      snapshot.docs.map((item) => ({
-        id: item.id,
-        ...item.data(),
-      })) as Application[];
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const applications =
+        snapshot.docs.map((item) => ({
+          id: item.id,
+          ...item.data(),
+        })) as Application[];
 
-    callback(applications);
-  });
+      callback(applications);
+    },
+    (error) => {
+      console.error("Application listener error:", error);
+    }
+  );
 }
 
 export function subscribeToOpportunityApplications(
@@ -157,15 +163,21 @@ export function subscribeToOpportunityApplications(
     orderBy("appliedAt", "desc")
   );
 
-  return onSnapshot(q, (snapshot) => {
-    const applications =
-      snapshot.docs.map((item) => ({
-        id: item.id,
-        ...item.data(),
-      })) as Application[];
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const applications =
+        snapshot.docs.map((item) => ({
+          id: item.id,
+          ...item.data(),
+        })) as Application[];
 
-    callback(applications);
-  });
+      callback(applications);
+    },
+    (error) => {
+      console.error("Application listener error:", error);
+    }
+  );
 }
 
 export async function updateApplicationStatus(

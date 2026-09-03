@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import Logo from "@/components/Logo";
+
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/context/AuthContext";
+
 import {
   Activity,
   ArrowUpRight,
@@ -17,9 +22,6 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-
-import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/context/AuthContext";
 
 import {
   getInstitutionAnalytics,
@@ -163,9 +165,9 @@ function InstitutionDashboard() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
           <Link
             href="/"
-            className="text-xl font-black tracking-tight"
+            className="flex items-center gap-3"
           >
-            Campus<span className="text-indigo-600">Link2</span>
+            <Logo width={36} height={36} />
           </Link>
 
           <div className="flex items-center gap-2">

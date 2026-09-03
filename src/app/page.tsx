@@ -18,6 +18,8 @@ import {
   Users,
 } from "lucide-react";
 
+import Logo from "@/components/Logo";
+
 const features = [
   {
     icon: Brain,
@@ -104,24 +106,14 @@ export default function Home() {
         <div className="absolute right-[5%] top-[20%] h-[400px] w-[400px] rounded-full bg-cyan-200/20 blur-[120px]" />
       </div>
 
+      
+
       {/* NAVBAR */}
       <header className="fixed left-0 right-0 top-0 z-50">
         <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
           <nav className="flex h-16 items-center justify-between rounded-2xl border border-slate-200/80 bg-white/85 px-5 shadow-lg shadow-slate-200/30 backdrop-blur-xl">
             <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-                <Network className="h-5 w-5" />
-              </div>
-
-              <div>
-                <div className="text-[17px] font-bold tracking-tight">
-                  Campus<span className="text-indigo-600">Link</span>
-                </div>
-
-                <div className="hidden text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:block">
-                  Skill Intelligence
-                </div>
-              </div>
+              <Logo width={32} height={32} />
             </Link>
 
             <div className="hidden items-center gap-7 md:flex">
@@ -190,7 +182,7 @@ export default function Home() {
 
               <h1 className="max-w-3xl text-5xl font-bold leading-[1.02] tracking-[-0.045em] text-slate-950 sm:text-6xl lg:text-7xl">
                 Your skills should open{" "}
-                <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-indigo-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
                   better doors.
                 </span>
               </h1>

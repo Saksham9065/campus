@@ -60,14 +60,20 @@ export function subscribeToNotifications(
     orderBy("createdAt", "desc")
   );
 
-  return onSnapshot(notificationQuery, (snapshot) => {
-    const notifications = snapshot.docs.map((item) => ({
-      id: item.id,
-      ...(item.data() as Omit<CampusNotification, "id">),
-    }));
+  return onSnapshot(
+    notificationQuery,
+    (snapshot) => {
+      const notifications = snapshot.docs.map((item) => ({
+        id: item.id,
+        ...(item.data() as Omit<CampusNotification, "id">),
+      }));
 
-    callback(notifications);
-  });
+      callback(notifications);
+    },
+    (error) => {
+      console.error("Notification listener error:", error);
+    }
+  );
 }
 
 export async function markNotificationAsRead(

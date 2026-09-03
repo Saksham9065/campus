@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import Logo from "@/components/Logo";
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -10,12 +12,10 @@ import {
   EyeOff,
   Loader2,
   LockKeyhole,
-  Network,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
 
-import { loginUser } from "@/lib/auth";
 import { getUserProfile } from "@/lib/users";
 import type { UserRole } from "@/types";
 
@@ -79,7 +79,7 @@ export default function LoginPage() {
           "Too many attempts. Please wait a while and try again."
         );
       } else {
-        setError("Unable to sign in. Please try again.");
+        setError(message || "Unable to sign in. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -99,18 +99,7 @@ export default function LoginPage() {
               href="/"
               className="flex w-fit items-center gap-3 text-white"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
-                <Network className="h-5 w-5" />
-              </div>
-
-              <div>
-                <p className="font-bold">
-                  Campus<span className="text-indigo-400">Link</span>
-                </p>
-                <p className="text-[9px] uppercase tracking-[0.2em] text-slate-500">
-                  Skill Intelligence
-                </p>
-              </div>
+              <Logo width={40} height={40} />
             </Link>
 
             <div className="max-w-xl">
@@ -166,13 +155,7 @@ export default function LoginPage() {
 
             <div className="mb-8 lg:hidden">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-white">
-                  <Network className="h-5 w-5" />
-                </div>
-
-                <p className="text-xl font-bold">
-                  Campus<span className="text-indigo-600">Link</span>
-                </p>
+                <Logo width={40} height={40} />
               </div>
             </div>
 

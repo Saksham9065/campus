@@ -1,6 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Logo from "@/components/Logo";
+import { useEffect, useState } from "react";
+
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/context/AuthContext";
+
 import {
   ArrowRight,
   BarChart3,
@@ -9,7 +15,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Network,
   PlusCircle,
   Settings,
   ShieldCheck,
@@ -17,10 +22,6 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-
-import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/context/AuthContext";
 
 import {
   getIndustryOpportunities,
@@ -175,19 +176,7 @@ function IndustryDashboardContent() {
             href="/industry"
             className="flex items-center gap-3"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-              <Network className="h-4 w-4" />
-            </div>
-
-            <div>
-              <p className="text-sm font-bold">
-                Campus<span className="text-indigo-600">Link</span>
-              </p>
-
-              <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Industry
-              </p>
-            </div>
+            <Logo width={36} height={36} subtitle="Industry" />
           </Link>
 
           <button

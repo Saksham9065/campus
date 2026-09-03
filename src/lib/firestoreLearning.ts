@@ -118,13 +118,19 @@ export function subscribeToStudentEnrollments(
     orderBy("enrolledAt", "desc")
   );
 
-  return onSnapshot(q, (snapshot) => {
-    const enrollments =
-      snapshot.docs.map((item) => ({
-        id: item.id,
-        ...item.data(),
-      })) as Enrollment[];
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const enrollments =
+        snapshot.docs.map((item) => ({
+          id: item.id,
+          ...item.data(),
+        })) as Enrollment[];
 
-    callback(enrollments);
-  });
+      callback(enrollments);
+    },
+    (error) => {
+      console.error("Enrollment listener error:", error);
+    }
+  );
 }

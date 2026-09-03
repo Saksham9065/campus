@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import Logo from "@/components/Logo";
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,14 +14,12 @@ import {
   EyeOff,
   GraduationCap,
   Loader2,
-  Network,
   School,
   ShieldCheck,
   Sparkles,
   Users,
 } from "lucide-react";
 
-import { registerUser } from "@/lib/auth";
 import { createUserProfile } from "@/lib/users";
 import type { CampusUser, UserRole } from "@/types";
 
@@ -98,7 +98,9 @@ export default function SignupPage() {
     }
 
     if (
-      (role === "student" || role === "institution") &&
+      (role === "student" ||
+        role === "institution" ||
+        role === "academia") &&
       !college.trim()
     ) {
       setError("Please enter your institution name.");
@@ -190,19 +192,7 @@ export default function SignupPage() {
               href="/"
               className="flex w-fit items-center gap-3 text-white"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
-                <Network className="h-5 w-5" />
-              </div>
-
-              <div>
-                <p className="font-bold">
-                  Campus<span className="text-indigo-400">Link</span>
-                </p>
-
-                <p className="text-[9px] uppercase tracking-[0.2em] text-slate-500">
-                  Skill Intelligence
-                </p>
-              </div>
+              <Logo width={40} height={40} />
             </Link>
 
             <div>
