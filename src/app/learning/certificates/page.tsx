@@ -212,7 +212,7 @@ function CertificateCard({
           </button>
 
           <Link
-            href={`/verify/${certificate.id}`}
+            href={`/verify/certificate/${certificate.id}`}
             className="flex flex-1 items-center justify-center rounded-xl bg-indigo-600 py-3 text-xs font-bold text-white"
           >
             Verify

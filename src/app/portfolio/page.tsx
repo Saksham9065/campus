@@ -238,7 +238,7 @@ function PassportContent() {
           </div>
 
           <Link
-            href={`/verify/${passport.passportId}`}
+            href={`/verify/passport/${passport.passportId}`}
             target="_blank"
             className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
           >
@@ -515,7 +515,7 @@ function PassportContent() {
             </div>
 
             <Link
-              href={`/verify/${passport.passportId}`}
+              href={`/verify/passport/${passport.passportId}`}
               target="_blank"
               className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white hover:bg-green-700"
             >
