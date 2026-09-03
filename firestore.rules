@@ -1,0 +1,216 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() &&
+             request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.role == "admin";
+    }
+
+    function isIndustry() {
+      return signedIn() &&
+        get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.role == "industry";
+    }
+
+    function isInstitution() {
+      return signedIn() &&
+        get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.role == "institution";
+    }
+
+    // --------------------------------
+    // USERS
+    // --------------------------------
+
+    match /users/{userId} {
+
+      allow read: if isOwner(userId) || isAdmin();
+
+      allow create: if isOwner(userId);
+
+      allow update: if isOwner(userId) || isAdmin();
+
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+
+    // --------------------------------
+    // ASSESSMENTS
+    // --------------------------------
+
+    match /assessments/{assessmentId} {
+
+      allow create:
+        if signedIn()
+        && request.resource.data.studentId == request.auth.uid;
+
+      allow read:
+        if signedIn()
+        && (
+          resource.data.studentId == request.auth.uid
+          || isAdmin()
+        );
+
+      allow update:
+        if signedIn()
+        && resource.data.studentId == request.auth.uid;
+
+      allow delete:
+        if signedIn()
+        && resource.data.studentId == request.auth.uid;
+    }
+
+
+    // --------------------------------
+    // OPPORTUNITIES
+    // --------------------------------
+
+    match /opportunities/{opportunityId} {
+
+      allow read:
+        if signedIn();
+
+      allow create:
+        if isIndustry()
+        && request.resource.data.companyId == request.auth.uid;
+
+      allow update:
+        if isAdmin()
+        || (
+          isIndustry()
+          && resource.data.companyId == request.auth.uid
+        );
+
+      allow delete:
+        if isAdmin()
+        || (
+          isIndustry()
+          && resource.data.companyId == request.auth.uid
+        );
+    }
+
+
+    // --------------------------------
+    // APPLICATIONS
+    // --------------------------------
+
+    match /applications/{applicationId} {
+
+      allow create:
+        if signedIn()
+        && request.resource.data.studentId == request.auth.uid;
+
+      allow read:
+        if signedIn()
+        && (
+          resource.data.studentId == request.auth.uid
+          || isAdmin()
+          || (
+            isIndustry()
+            && resource.data.companyId == request.auth.uid
+          )
+        );
+
+      allow update:
+        if isAdmin()
+        || (
+          isIndustry()
+          && resource.data.companyId == request.auth.uid
+        );
+
+      allow delete:
+        if isAdmin()
+        || resource.data.studentId == request.auth.uid;
+    }
+
+
+    // --------------------------------
+    // LEARNING
+    // --------------------------------
+
+    match /enrollments/{enrollmentId} {
+
+      allow create:
+        if signedIn()
+        && request.resource.data.studentId == request.auth.uid;
+
+      allow read, update:
+        if signedIn()
+        && (
+          resource.data.studentId == request.auth.uid
+          || isAdmin()
+        );
+
+      allow delete:
+        if signedIn()
+        && resource.data.studentId == request.auth.uid;
+    }
+
+
+    // --------------------------------
+    // CERTIFICATES
+    // --------------------------------
+
+    match /certificates/{certificateId} {
+
+      allow read:
+        if true;
+
+      allow create:
+        if signedIn()
+        && (
+          request.resource.data.studentId == request.auth.uid
+          || isAdmin()
+        );
+
+      allow update, delete:
+        if isAdmin();
+    }
+
+
+    // --------------------------------
+    // NOTIFICATIONS
+    // --------------------------------
+
+    match /notifications/{notificationId} {
+
+      allow read:
+        if signedIn()
+        && resource.data.userId == request.auth.uid;
+
+      allow update:
+        if signedIn()
+        && resource.data.userId == request.auth.uid;
+
+      allow create:
+        if signedIn();
+
+      allow delete:
+        if signedIn()
+        && resource.data.userId == request.auth.uid;
+    }
+
+
+    // --------------------------------
+    // DEFAULT DENY
+    // --------------------------------
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
