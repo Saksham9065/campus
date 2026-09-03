@@ -57,25 +57,22 @@ function Opportunities() {
     load();
   }, [user]);
 
-  const filtered = (() => {
-    const term =
-      search.toLowerCase().trim();
+  const filtered = opportunities.filter((opp) => {
+    const term = search.toLowerCase().trim();
 
-    if (!term) return opportunities;
+    if (!term) return true;
 
-    return opportunities.filter((opp) =>
-      [
-        opp.title,
-        opp.company,
-        opp.type,
-        opp.location,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-        .includes(term)
-    );
-  })(opportunities, search);
+    return [
+      opp.title,
+      opp.company,
+      opp.type,
+      opp.location,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(term);
+  });
 
   if (loading) {
     return (

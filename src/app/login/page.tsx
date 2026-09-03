@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { getUserProfile } from "@/lib/users";
+import { loginUser } from "@/lib/auth";
 import type { UserRole } from "@/types";
 
 const roleRedirects: Record<UserRole, string> = {

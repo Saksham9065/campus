@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { createUserProfile } from "@/lib/users";
+import { registerUser } from "@/lib/auth";
 import type { CampusUser, UserRole } from "@/types";
 
 const roles = [

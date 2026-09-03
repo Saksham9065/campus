@@ -8,7 +8,6 @@ import {
   BarChart3,
   Loader2,
   TrendingUp,
-  Users,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -269,36 +268,34 @@ function Reports() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-black text-slate-950">
-                Role Distribution
+                Placement Stages
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Breakdown by user role in the institution.
+                Breakdown of student placement readiness.
               </p>
             </div>
 
             <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600">
-              <Users className="h-5 w-5" />
+              <TrendingUp className="h-5 w-5" />
             </div>
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {analytics.roleDistribution.map(
-              (role) => (
-                <div
-                  key={role.role}
-                  className="rounded-2xl bg-slate-50 p-4 text-center"
-                >
-                  <p className="text-2xl font-black">
-                    {role.count}
-                  </p>
+            {analytics.placementStages.map((stage) => (
+              <div
+                key={stage.stage}
+                className="rounded-2xl bg-slate-50 p-4 text-center"
+              >
+                <p className="text-2xl font-black">
+                  {stage.count}
+                </p>
 
-                  <p className="mt-1 text-xs font-bold text-slate-500">
-                    {role.role}
-                  </p>
-                </div>
-              )
-            )}
+                <p className="mt-1 text-xs font-bold text-slate-500">
+                  {stage.stage}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
       </div>

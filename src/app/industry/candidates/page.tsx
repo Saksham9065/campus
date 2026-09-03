@@ -56,30 +56,24 @@ function Candidates() {
     load();
   }, [user]);
 
-  const totalApplicants = opportunities.reduce(
-    (sum, opp) => sum + (opp.applicants || 0),
-    0
-  );
+  const totalApplicants = opportunities.length;
 
-  const filteredOpportunities = (() => {
-    const term =
-      search.toLowerCase().trim();
+  const filteredOpportunities = opportunities.filter((opp) => {
+    const term = search.toLowerCase().trim();
 
-    if (!term) return opportunities;
+    if (!term) return true;
 
-    return opportunities.filter((opp) =>
-      [
-        opp.title,
-        opp.company,
-        opp.type,
-        opp.location,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-        .includes(term)
-    );
-  })(opportunities, search);
+    return [
+      opp.title,
+      opp.company,
+      opp.type,
+      opp.location,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(term);
+  });
 
   if (loading) {
     return (
@@ -228,7 +222,7 @@ function Candidates() {
 
                   <div className="flex items-center gap-3">
                     <span className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700">
-                      {opp.applicants || 0} applicants
+                     0 applicants
                     </span>
                   </div>
                 </div>
