@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -10,15 +11,20 @@ import {
   CheckCircle2,
   GraduationCap,
   LineChart,
+  Menu,
   Network,
   Search,
   ShieldCheck,
   Sparkles,
   Target,
+  UserRound,
   Users,
+  X,
 } from "lucide-react";
 
 import Logo from "@/components/Logo";
+
+import { useAuth } from "@/context/AuthContext";
 
 const features = [
   {
@@ -98,12 +104,67 @@ const steps = [
 ];
 
 export default function Home() {
+  const [landingPhase, setLandingPhase] = useState<
+    "entering" | "visible" | "exiting" | "done"
+  >("entering");
+
+  useEffect(() => {
+    const enterTimer = setTimeout(() => {
+      setLandingPhase("visible");
+    }, 50);
+
+    const exitTimer = setTimeout(() => {
+      setLandingPhase("exiting");
+    }, 2200);
+
+    return () => {
+      clearTimeout(enterTimer);
+      clearTimeout(exitTimer);
+    };
+  }, []);
+
+  if (landingPhase !== "done") {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={
+            landingPhase === "exiting"
+              ? { opacity: 0, scale: 1.05, y: -20 }
+              : { opacity: 1, scale: 1 }
+          }
+          transition={
+            landingPhase === "exiting"
+              ? { duration: 0.6, ease: "easeIn" }
+              : { duration: 0.8, ease: "easeOut" }
+          }
+          onAnimationComplete={() => {
+            if (landingPhase === "exiting") {
+              setLandingPhase("done");
+            }
+          }}
+          className="flex flex-col items-center gap-6"
+        >
+          <Logo width={300} height={300} />
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="text-base font-semibold uppercase tracking-[0.35em] text-slate-500"
+          >
+            Skill Intelligence
+          </motion.p>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#f8fafc] text-slate-900">
       {/* Background */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute left-[10%] top-[5%] h-[450px] w-[450px] rounded-full bg-indigo-200/30 blur-[120px]" />
-        <div className="absolute right-[5%] top-[20%] h-[400px] w-[400px] rounded-full bg-cyan-200/20 blur-[120px]" />
+        <div className="absolute left-[10%] top-[5%] h-[300px] w-[300px] rounded-full bg-indigo-200/30 blur-[120px] sm:h-[450px] sm:w-[450px]" />
+        <div className="absolute right-[5%] top-[20%] h-[300px] w-[300px] rounded-full bg-cyan-200/20 blur-[120px] sm:h-[400px] sm:w-[400px]" />
       </div>
 
       
@@ -111,12 +172,12 @@ export default function Home() {
       {/* NAVBAR */}
       <header className="fixed left-0 right-0 top-0 z-50">
         <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
-          <nav className="flex h-16 items-center justify-between rounded-2xl border border-slate-200/80 bg-white/85 px-5 shadow-lg shadow-slate-200/30 backdrop-blur-xl">
+          <nav className="flex h-16 items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white/85 px-4 shadow-lg shadow-slate-200/30 backdrop-blur-xl sm:px-5">
             <Link href="/" className="flex items-center gap-3">
               <Logo width={32} height={32} />
             </Link>
 
-            <div className="hidden items-center gap-7 md:flex">
+            <div className="hidden items-center gap-4 md:gap-7 lg:flex">
               <Link
                 href="/assessment/career"
                 className="text-sm font-medium text-slate-600 transition hover:text-indigo-600"
@@ -147,20 +208,12 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Link
-                href="/login"
-                className="hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 sm:block"
-              >
-                Login
-              </Link>
-
-              <Link
-                href="/signup"
-                className="group flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-indigo-700"
-              >
-                Get Started
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-              </Link>
+              <div className="md:hidden">
+                <MobileMenu />
+              </div>
+              <div className="hidden md:block">
+                <AuthActions />
+              </div>
             </div>
           </nav>
         </div>
@@ -483,5 +536,117 @@ export default function Home() {
         </div>
       </footer>
     </main>
+  );
+}
+
+function AuthActions() {
+  const { user, logout } = useAuth();
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-2">
+        <Link
+          href="/login"
+          className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 lg:block"
+        >
+          Login
+        </Link>
+
+        <Link
+          href="/signup"
+          className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-3 py-2 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-indigo-700"
+        >
+          <span className="hidden sm:inline">Get Started</span>
+          <span className="sm:hidden">Sign up</span>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href="/profile"
+      className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700 transition hover:bg-indigo-200"
+      title="Profile"
+    >
+      {user.email?.charAt(0).toUpperCase() || "U"}
+    </Link>
+  );
+}
+
+function MobileMenu() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-700"
+        aria-label="Open menu"
+      >
+        <Menu className="h-4 w-4" />
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-50 bg-slate-950/40">
+          <div className="absolute right-4 top-4 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+            <div className="flex items-center justify-between px-3 py-2">
+              <Logo width={28} height={28} />
+              <button
+                onClick={() => setOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+                aria-label="Close menu"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-2 space-y-1">
+              <MobileLink href="/assessment/career" onSelect={() => setOpen(false)}>
+                Assessment
+              </MobileLink>
+              <MobileLink href="/roadmap" onSelect={() => setOpen(false)}>
+                Roadmap
+              </MobileLink>
+              <MobileLink href="/opportunities" onSelect={() => setOpen(false)}>
+                Opportunities
+              </MobileLink>
+              <MobileLink href="/portfolio" onSelect={() => setOpen(false)}>
+                Skill Passport
+              </MobileLink>
+            </div>
+
+            <div className="mt-2 border-t border-slate-100 pt-2">
+              <MobileLink href="/login" onSelect={() => setOpen(false)}>
+                Login
+              </MobileLink>
+              <MobileLink href="/signup" onSelect={() => setOpen(false)}>
+                Get Started
+              </MobileLink>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function MobileLink({
+  href,
+  children,
+  onSelect,
+}: {
+  href: string;
+  children: React.ReactNode;
+  onSelect?: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onSelect}
+      className="block rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+    >
+      {children}
+    </Link>
   );
 }
