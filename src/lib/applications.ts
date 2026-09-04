@@ -124,3 +124,9 @@ export function getStatusDescription(
 
   return descriptions[status];
 }
+
+export function getStudentMessage(
+  status: ApplicationStatus
+) {
+  return getStatusDescription(status);
+}

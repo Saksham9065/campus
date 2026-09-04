@@ -52,7 +52,8 @@ export async function createNotification(
 
 export function subscribeToNotifications(
   userId: string,
-  callback: (notifications: CampusNotification[]) => void
+  callback: (notifications: CampusNotification[]) => void,
+  onError?: (error: Error) => void
 ) {
   const notificationQuery = query(
     collection(db, "notifications"),
@@ -72,6 +73,7 @@ export function subscribeToNotifications(
     },
     (error) => {
       console.error("Notification listener error:", error);
+      if (onError) onError(error as Error);
     }
   );
 }

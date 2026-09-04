@@ -9,13 +9,13 @@ import {
   ChevronRight,
   Clock3,
   Loader2,
-  Network,
   Sparkles,
   Target,
   Wrench,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { getLatestAssessment } from "@/lib/firestoreAssessment";
 import {
@@ -25,6 +25,7 @@ import {
 } from "@/lib/skillEngine";
 import {
   recommendLearningPrograms,
+  learningPrograms,
   type LearningProgram,
 } from "@/lib/learningEngine";
 
@@ -35,12 +36,15 @@ function RoadmapContent() {
     RoadmapNode[]
   >([]);
 
-  const [recommendations, setRecommendations] =
+   const [recommendations, setRecommendations] =
     useState<
       {
         program: LearningProgram;
         relevance: number;
         matchingSkills: string[];
+        careerMatch: boolean;
+        matchingDomains: string[];
+        score: number;
       }[]
     >([]);
 
@@ -76,8 +80,15 @@ function RoadmapContent() {
           (skill) => skill.score < 70
         );
 
-        setRecommendations(
-          recommendLearningPrograms(gaps)
+         setRecommendations(
+          recommendLearningPrograms(
+            gaps,
+            learningPrograms,
+            {
+              careerRole: profile?.careerRole,
+              domains: profile?.assessmentDomain,
+            }
+          )
         );
       } catch (error) {
         console.error(error);
@@ -87,7 +98,7 @@ function RoadmapContent() {
     }
 
     loadRoadmap();
-  }, [user]);
+  }, [user, profile?.careerRole, profile?.assessmentDomain]);
 
   if (loading) {
     return (
@@ -106,15 +117,7 @@ function RoadmapContent() {
               href="/dashboard"
               className="flex items-center gap-3"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-                <Network className="h-4 w-4" />
-              </div>
-
-              <span className="font-bold">
-                Campus<span className="text-indigo-600">
-                  Link
-                </span>
-              </span>
+              <Logo width={32} height={32} />
             </Link>
           </div>
         </header>
@@ -153,15 +156,7 @@ function RoadmapContent() {
             href="/dashboard"
             className="flex items-center gap-3"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-              <Network className="h-4 w-4" />
-            </div>
-
-            <span className="font-bold">
-              Campus<span className="text-indigo-600">
-                Link
-              </span>
-            </span>
+            <Logo width={32} height={32} />
           </Link>
 
           <Link
@@ -199,7 +194,7 @@ function RoadmapContent() {
         </div>
 
         {/* Roadmap */}
-        <section className="mt-10 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="mt-10 rounded-4xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="mb-8 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50">
               <Target className="h-5 w-5 text-indigo-600" />
@@ -218,7 +213,7 @@ function RoadmapContent() {
 
           <div className="relative">
             {/* Connecting line */}
-            <div className="absolute bottom-7 left-[19px] top-7 w-px bg-slate-200 sm:left-[23px]" />
+            <div className="absolute bottom-7 left-4.75 top-7 w-px bg-slate-200 sm:left-5.75" />
 
             <div className="space-y-7">
               {roadmap.map((node, index) => (
@@ -308,26 +303,26 @@ function RoadmapContent() {
         {/* Recommended Learning */}
         <section className="mt-6">
           <div className="flex items-end justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-                Recommended learning
-              </p>
+             <div>
+               <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                 Recommended learning
+               </p>
 
-              <h2 className="mt-2 text-2xl font-bold text-slate-950">
-                Close your highest-priority gaps.
-              </h2>
-            </div>
+               <h2 className="mt-2 text-2xl font-bold text-slate-950">
+                 Based on your career, preferences and skill gaps.
+               </h2>
+             </div>
 
-            <Link
-              href="/learning"
-              className="hidden items-center gap-1 text-xs font-bold text-indigo-600 sm:flex"
-            >
-              View all
-              <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
+             <Link
+               href="/learning"
+               className="hidden items-center gap-1 text-xs font-bold text-indigo-600 sm:flex"
+             >
+               View all
+               <ChevronRight className="h-4 w-4" />
+             </Link>
+           </div>
 
-          {recommendations.length ? (
+           {recommendations.length ? (
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               {recommendations
                 .slice(0, 4)
@@ -341,14 +336,29 @@ function RoadmapContent() {
                         <BookOpen className="h-5 w-5 text-indigo-600" />
                       </div>
 
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
-                        {item.relevance} gap
-                        {item.relevance > 1
-                          ? "s"
-                          : ""}
-                        covered
-                      </span>
-                    </div>
+                   <span
+                          className={`rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700`}
+                        >
+                          {item.relevance} gap
+                          {item.relevance > 1
+                            ? "s"
+                            : ""}
+                          covered
+                        </span>
+
+                        {item.careerMatch && (
+                          <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-700">
+                            Career match
+                          </span>
+                        )}
+
+                        {item.matchingDomains.length > 0 && (
+                          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">
+                            {item.matchingDomains.length}
+                            {" "}domain match
+                          </span>
+                        )}
+                      </div>
 
                     <h3 className="mt-5 font-bold text-slate-950">
                       {item.program.title}
@@ -358,18 +368,35 @@ function RoadmapContent() {
                       {item.program.description}
                     </p>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {item.matchingSkills.map(
-                        (skill) => (
-                          <span
-                            key={skill}
-                            className="rounded-lg bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-500"
-                          >
-                            {skill}
-                          </span>
-                        )
-                      )}
-                    </div>
+                     <div className="mt-4 flex flex-wrap gap-2">
+                       {item.matchingSkills.map(
+                         (skill) => (
+                           <span
+                             key={skill}
+                             className="rounded-lg bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-500"
+                           >
+                             {skill}
+                           </span>
+                         )
+                       )}
+
+                       {item.careerMatch && (
+                         <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-[10px] font-semibold text-indigo-700">
+                           {item.program.career}
+                         </span>
+                       )}
+
+                       {item.matchingDomains
+                         .slice(0, 2)
+                         .map((domain) => (
+                           <span
+                             key={domain}
+                             className="rounded-lg bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700"
+                           >
+                             {domain}
+                           </span>
+                         ))}
+                     </div>
 
                     <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
                       <span className="text-xs font-medium text-slate-400">

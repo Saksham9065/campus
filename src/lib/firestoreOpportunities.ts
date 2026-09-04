@@ -1,12 +1,14 @@
 import {
   addDoc,
   collection,
+  doc,
   getDocs,
   limit,
   orderBy,
   query,
   serverTimestamp,
   where,
+  writeBatch,
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
@@ -49,3 +51,30 @@ export async function getOpenOpportunities(): Promise<
     ...item.data(),
   })) as JobOpportunity[];
 }
+
+export async function deleteOpportunity(
+  opportunityId: string
+) {
+  const batch = writeBatch(db);
+
+  const applicationsQuery = query(
+    collection(db, "applications"),
+    where("opportunityId", "==", opportunityId)
+  );
+
+  const applicationSnapshot =
+    await getDocs(applicationsQuery);
+
+  applicationSnapshot.docs.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
+
+  batch.delete(
+    doc(db, "opportunities", opportunityId)
+  );
+
+  await batch.commit();
+
+  return opportunityId;
+}
+

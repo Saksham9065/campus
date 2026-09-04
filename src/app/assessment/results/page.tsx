@@ -10,13 +10,13 @@ import {
   CheckCircle2,
   ChevronRight,
   Loader2,
-  Network,
   Sparkles,
   Target,
   TrendingUp,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { getLatestAssessment } from "@/lib/firestoreAssessment";
 import {
@@ -89,13 +89,7 @@ function ResultsContent() {
             href="/dashboard"
             className="flex items-center gap-3"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-              <Network className="h-4 w-4" />
-            </div>
-
-            <span className="font-bold">
-              Campus<span className="text-indigo-600">Link</span>
-            </span>
+            <Logo width={32} height={32} />
           </Link>
 
           <Link

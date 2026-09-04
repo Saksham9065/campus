@@ -9,7 +9,6 @@ import { useAuth } from "@/context/AuthContext";
 
 import {
   ArrowRight,
-  BarChart3,
   Bell,
   BookOpen,
   Brain,
@@ -19,6 +18,9 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Route,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -54,7 +56,7 @@ const navigation = [
   {
     label: "Career Roadmap",
     href: "/roadmap",
-    icon: Target,
+    icon: Route,
   },
   {
     label: "Opportunities",
@@ -76,17 +78,15 @@ const navigation = [
     href: "/placement-readiness",
     icon: Target,
   },
-  {
-    label: "Skill Passport",
-    href: "/portfolio",
-    icon: ShieldCheck,
-  },
 ];
 
 function DashboardContent() {
   const { profile, logout, user } = useAuth();
 
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const [sidebarCollapsed, setSidebarCollapsed] =
+    useState(false);
 
   const [applicationCount, setApplicationCount] =
     useState(0);
@@ -234,27 +234,11 @@ function DashboardContent() {
 
           <nav className="space-y-1">
             <Link
-              href="/analytics"
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-            >
-              <BarChart3 className="h-4 w-4 text-slate-400" />
-              Analytics
-            </Link>
-
-            <Link
               href="/copilot"
               className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"
             >
               <Sparkles className="h-4 w-4 text-slate-400" />
               Career Copilot
-            </Link>
-
-            <Link
-              href="/placement-readiness"
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-            >
-              <Target className="h-4 w-4 text-slate-400" />
-              Placement Readiness
             </Link>
           </nav>
         </div>
@@ -453,7 +437,7 @@ function DashboardContent() {
           </section>
 
           {/* Main cards */}
-          <section className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_.6fr]">
+          <section className="mt-6">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-start justify-between">
                 <div>
@@ -503,61 +487,6 @@ function DashboardContent() {
                 ))}
               </div>
             </div>
-
-            <div className="rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-sm">
-                <Sparkles className="h-5 w-5 text-indigo-600" />
-              </div>
-
-              <h2 className="mt-5 font-bold text-indigo-950">
-                Career Copilot
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-indigo-700/70">
-                Your context-aware career assistant will help you understand
-                skill gaps, learning paths and opportunities.
-              </p>
-
-              <Link
-                href="/copilot"
-                className="mt-6 inline-flex items-center gap-1 text-xs font-bold text-indigo-600"
-              >
-                Open Copilot
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </section>
-
-          {/* Placement Readiness CTA */}
-          <section className="mt-6 rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-6 shadow-sm">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-                  Placement Intelligence
-                </p>
-
-                <h2 className="mt-2 text-xl font-bold text-slate-950">
-                  See your placement readiness
-                </h2>
-
-                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                  Combine skills, profile completeness, learning progress and
-                  recruitment activity into one readiness score.
-                </p>
-              </div>
-
-              <div className="hidden h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 sm:flex">
-                <Target className="h-5 w-5 text-indigo-600" />
-              </div>
-            </div>
-
-            <Link
-              href="/placement-readiness"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
-            >
-              View Readiness
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </section>
 
           {/* Profile CTA */}

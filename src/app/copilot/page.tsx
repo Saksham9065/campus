@@ -1,190 +1,69 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 import Link from "next/link";
+
 import {
   ArrowLeft,
   Bot,
-  BriefcaseBusiness,
-  GraduationCap,
   Loader2,
   Send,
-  Sparkles,
-  Target,
   UserRound,
 } from "lucide-react";
-import { FormEvent, useEffect, useRef, useState } from "react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/context/AuthContext";
 
 import {
-  subscribeToStudentApplications,
-} from "@/lib/firestoreApplications";
+  useCopilot,
+} from "@/lib/copilotContext";
 
-import {
-  subscribeToStudentEnrollments,
-  type Enrollment,
-} from "@/lib/firestoreLearning";
-
-import type { Application } from "@/lib/applications";
-
-type Message = {
-  id: number;
-  role: "user" | "assistant";
-  content: string;
-};
-
-const suggestions = [
-  "What are my biggest skill gaps?",
-  "How can I improve my placement readiness?",
-  "Which career path fits my current skills?",
-  "What should I learn next?",
-];
+import Logo from "@/components/Logo";
 
 function CopilotContent() {
-  const { user, profile } = useAuth();
+  const {
+    isOpen,
+    open,
+    messages,
+    input,
+    setInput,
+    sending,
+    sendMessage,
+    suggestions,
+    unreadCount,
+    clearUnread,
+  } = useCopilot();
 
-  const [applications, setApplications] = useState<Application[]>(
-    []
-  );
-
-  const [learning, setLearning] = useState<Enrollment[]>([]);
-
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      role: "assistant",
-      content:
-        "Hi! I'm your CampusLink Career Copilot. I can analyze your skills, learning progress, applications and placement readiness. What would you like to work on?",
-    },
-  ]);
-
-  const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
-
-  const counterRef = useRef(1);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (!user) return;
-
-    const unsubscribeApplications =
-      subscribeToStudentApplications(
-        user.uid,
-        setApplications
-      );
-
-    const unsubscribeLearning =
-      subscribeToStudentEnrollments(
-        user.uid,
-        setLearning
-      );
-
-    return () => {
-      unsubscribeApplications();
-      unsubscribeLearning();
-    };
-  }, [user]);
-
-  async function sendMessage(message?: string) {
-    const text = (message ?? input).trim();
-
-    if (!text || sending || !profile) return;
-
-    const userMessage: Message = {
-      id: counterRef.current++,
-      role: "user",
-      content: text,
-    };
-
-    setMessages((current) => [
-      ...current,
-      userMessage,
-    ]);
-
-    setInput("");
-    setSending(true);
-
-    try {
-      const response = await fetch("/api/copilot", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: text,
-
-          student: {
-            name: profile.name,
-            college: profile.college,
-            degree: profile.degree,
-            branch: profile.branch,
-            year: profile.year,
-            careerRole: profile.careerRole,
-            readiness: profile.readiness,
-            skillScores: profile.skillScores,
-          },
-
-          applications: applications.map(
-            (application) => ({
-              opportunityTitle:
-                application.opportunityTitle,
-              company: application.company,
-              status: application.status,
-            })
-          ),
-
-          learning: learning.map((item) => ({
-            programTitle: item.programTitle,
-            provider: item.provider,
-            progress: item.progress,
-            status: item.status,
-            skills: item.skills,
-          })),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || "Something went wrong."
-        );
-      }
-
-      setMessages((current) => [
-        ...current,
-        {
-          id: counterRef.current++,
-          role: "assistant",
-          content: data.answer,
-        },
-      ]);
-    } catch (error) {
-      console.error(error);
-
-      setMessages((current) => [
-        ...current,
-        {
-          id: counterRef.current++,
-          role: "assistant",
-          content:
-            "I couldn't connect to the AI service right now. Please check your Gemini API configuration and try again.",
-        },
-      ]);
-    } finally {
-      setSending(false);
+    if (isOpen) {
+      clearUnread();
     }
-  }
+  }, [isOpen, clearUnread]);
 
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    sendMessage();
-  }
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages, sending]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(
+        textareaRef.current.scrollHeight,
+        160
+      )}px`;
+    }
+  }, [input]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
+    <div className="flex h-screen flex-col bg-[#F8FAFC]">
+      {/* TOPBAR */}
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white/85 px-4 backdrop-blur-xl sm:px-6">
+        <div className="flex items-center gap-3">
           <Link
             href="/dashboard"
             className="flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
@@ -193,10 +72,24 @@ function CopilotContent() {
             Dashboard
           </Link>
 
+          <div className="hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 sm:flex">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            Online
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {!isOpen && unreadCount > 0 && (
+            <button
+              onClick={open}
+              className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-1 text-[10px] font-bold text-indigo-700"
+            >
+              {unreadCount} new
+            </button>
+          )}
+
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-              <Bot className="h-5 w-5" />
-            </div>
+            <Logo width={32} height={32} showText={false} />
 
             <div>
               <p className="text-sm font-bold text-slate-950">
@@ -208,118 +101,78 @@ function CopilotContent() {
               </p>
             </div>
           </div>
-
-          <div className="hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 sm:flex">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            Online
-          </div>
         </div>
       </header>
 
-      <main className="mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl gap-6 px-4 py-5 sm:px-8 lg:grid-cols-[280px_1fr]">
-        <aside className="hidden lg:block">
-          <div className="sticky top-24 space-y-4">
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                <Sparkles className="h-6 w-6" />
-              </div>
-
-              <h2 className="mt-5 font-bold text-slate-950">
-                Your Career AI
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                Copilot understands your CampusLink profile
-                and uses your actual career data.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <ContextCard
-                icon={Target}
-                title="Readiness"
-                value={
-                  profile?.readiness !== undefined
-                    ? `${profile.readiness}%`
-                    : "Not assessed"
-                }
-              />
-
-              <ContextCard
-                icon={BriefcaseBusiness}
-                title="Applications"
-                value={`${applications.length}`}
-              />
-
-              <ContextCard
-                icon={GraduationCap}
-                title="Learning"
-                value={`${learning.length} programs`}
-              />
-
-              <ContextCard
-                icon={UserRound}
-                title="Career"
-                value={
-                  profile?.careerRole || "Not selected"
-                }
-              />
-            </div>
-          </div>
-        </aside>
-
-        <section className="flex min-h-[calc(100vh-113px)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 bg-gradient-to-r from-indigo-50/70 via-white to-cyan-50/50 px-5 py-5 sm:px-7">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
-                <Bot className="h-5 w-5" />
-              </div>
-
-              <div>
-                <h1 className="font-bold text-slate-950">
-                  CampusLink Career Copilot
-                </h1>
-
-                <p className="text-xs text-slate-500">
-                  Personalized guidance based on your data
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 space-y-5 overflow-y-auto p-5 sm:p-7">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.role === "user"
-                    ? "justify-end"
-                    : "justify-start"
-                }`}
-              >
+      {/* MAIN CHAT */}
+      <main className="flex-1 overflow-hidden">
+        <div className="mx-auto flex h-full max-w-4xl flex-col">
+          <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+            <div className="space-y-6">
+              {messages.map((message) => (
                 <div
-                  className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-7 sm:max-w-[75%] ${
+                  key={message.id}
+                  className={`flex ${
                     message.role === "user"
-                      ? "rounded-br-md bg-indigo-600 text-white"
-                      : "rounded-bl-md border border-slate-200 bg-slate-50 text-slate-700"
+                      ? "justify-end"
+                      : "justify-start"
                   }`}
                 >
-                  {message.content}
-                </div>
-              </div>
-            ))}
+                  <div
+                    className={`flex max-w-[85%] gap-3 sm:max-w-[75%] ${
+                      message.role === "user"
+                        ? "flex-row-reverse"
+                        : "flex-row"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${
+                        message.role === "user"
+                          ? "bg-indigo-600 text-white"
+                          : "bg-slate-900 text-white"
+                      }`}
+                    >
+                      {message.role === "user" ? (
+                        <UserRound className="h-4 w-4" />
+                      ) : (
+                        <Bot className="h-4 w-4" />
+                      )}
+                    </div>
 
-            {sending && (
-              <div className="flex justify-start">
-                <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-                  <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
-                  Analyzing your career data...
+                    <div
+                      className={`rounded-2xl px-4 py-3 text-sm leading-7 ${
+                        message.role === "user"
+                          ? "rounded-br-md bg-indigo-600 text-white"
+                          : "rounded-bl-md border border-slate-200 bg-white text-slate-700 shadow-sm"
+                      }`}
+                    >
+                      {message.content}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              ))}
+
+              {sending && (
+                <div className="flex justify-start">
+                  <div className="flex max-w-[75%] gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
+                      <Bot className="h-4 w-4" />
+                    </div>
+
+                    <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 shadow-sm">
+                      <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+                      Analyzing your career data...
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
           </div>
 
-          <div className="border-t border-slate-100 bg-white p-4 sm:p-5">
+          {/* INPUT AREA */}
+          <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-4 sm:px-6">
             <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
               {suggestions.map((suggestion) => (
                 <button
@@ -334,10 +187,14 @@ function CopilotContent() {
             </div>
 
             <form
-              onSubmit={handleSubmit}
+              onSubmit={(event) => {
+                event.preventDefault();
+                sendMessage();
+              }}
               className="flex items-end gap-3"
             >
               <textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(event) =>
                   setInput(event.target.value)
@@ -348,12 +205,10 @@ function CopilotContent() {
                     !event.shiftKey
                   ) {
                     event.preventDefault();
-                    handleSubmit(
-                      event as unknown as FormEvent
-                    );
+                    sendMessage();
                   }
                 }}
-                rows={2}
+                rows={1}
                 placeholder="Ask about your skills, roadmap, internships or placement..."
                 className="min-h-[52px] flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
               />
@@ -361,7 +216,7 @@ function CopilotContent() {
               <button
                 type="submit"
                 disabled={!input.trim() || sending}
-                className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-[52px] w-13 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {sending ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -376,36 +231,8 @@ function CopilotContent() {
               career, recruitment and institutional information.
             </p>
           </div>
-        </section>
+        </div>
       </main>
-    </div>
-  );
-}
-
-function ContextCard({
-  icon: Icon,
-  title,
-  value,
-}: {
-  icon: typeof Target;
-  title: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-indigo-600">
-        <Icon className="h-4 w-4" />
-      </div>
-
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-          {title}
-        </p>
-
-        <p className="truncate text-xs font-bold text-slate-800">
-          {value}
-        </p>
-      </div>
     </div>
   );
 }

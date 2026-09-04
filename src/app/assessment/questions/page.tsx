@@ -9,132 +9,20 @@ import {
   CheckCircle2,
   Clock3,
   Loader2,
-  Network,
   Sparkles,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { saveAssessment } from "@/lib/firestoreAssessment";
 import {
   calculateSkillScore,
 } from "@/lib/skillEngine";
 import { updateUserProfile } from "@/lib/users";
-
-type Question = {
-  id: string;
-  question: string;
-  options: string[];
-  correct: number;
-  skill: string;
-};
-
-const questions: Question[] = [
-  {
-    id: "python-dict",
-    question:
-      "Which Python data structure stores key-value pairs?",
-    options: [
-      "List",
-      "Tuple",
-      "Dictionary",
-      "Set",
-    ],
-    correct: 2,
-    skill: "Python",
-  },
-  {
-    id: "sql-select",
-    question:
-      "Which SQL command is used to retrieve data from a table?",
-    options: [
-      "INSERT",
-      "SELECT",
-      "UPDATE",
-      "DELETE",
-    ],
-    correct: 1,
-    skill: "SQL",
-  },
-  {
-    id: "statistics-median",
-    question:
-      "What does the median represent in a dataset?",
-    options: [
-      "Most frequent value",
-      "Average value",
-      "Middle value",
-      "Largest value",
-    ],
-    correct: 2,
-    skill: "Statistics",
-  },
-  {
-    id: "pandas",
-    question:
-      "Which Python library is commonly used for tabular data analysis?",
-    options: [
-      "Pandas",
-      "Flask",
-      "Django",
-      "Requests",
-    ],
-    correct: 0,
-    skill: "Python",
-  },
-  {
-    id: "visualization",
-    question:
-      "Which visualization is generally suitable for showing a trend over time?",
-    options: [
-      "Pie chart",
-      "Line chart",
-      "Scatter plot",
-      "Single number",
-    ],
-    correct: 1,
-    skill: "Data Visualization",
-  },
-  {
-    id: "sql-where",
-    question:
-      "Which SQL clause filters rows based on a condition?",
-    options: [
-      "GROUP BY",
-      "ORDER BY",
-      "WHERE",
-      "JOIN",
-    ],
-    correct: 2,
-    skill: "SQL",
-  },
-  {
-    id: "python-len",
-    question:
-      "What does len() return when used with a Python list?",
-    options: [
-      "The last element",
-      "The number of elements",
-      "The memory address",
-      "The data type",
-    ],
-    correct: 1,
-    skill: "Python",
-  },
-  {
-    id: "analytics-duplicate",
-    question:
-      "What is an important first step when a dataset contains duplicate records?",
-    options: [
-      "Ignore them",
-      "Duplicate them again",
-      "Identify and handle duplicates",
-      "Delete the entire dataset",
-    ],
-    correct: 2,
-    skill: "Data Analytics",
-  },
-];
+import {
+  getQuestionsForRole,
+} from "@/lib/assessmentQuestions";
 
 function QuestionsContent() {
   const router = useRouter();
@@ -152,6 +40,11 @@ function QuestionsContent() {
     useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const questions = useMemo(
+    () => getQuestionsForRole(role),
+    [role]
+  );
+
   const question = questions[current];
 
   const progress = useMemo(
@@ -159,7 +52,7 @@ function QuestionsContent() {
       Math.round(
         ((current + 1) / questions.length) * 100
       ),
-    [current]
+    [current, questions.length]
   );
 
   function chooseAnswer(index: number) {
@@ -262,19 +155,17 @@ function QuestionsContent() {
             href="/dashboard"
             className="flex items-center gap-3"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-              <Network className="h-4 w-4" />
-            </div>
-
-            <span className="font-bold">
-              Campus<span className="text-indigo-600">Link</span>
-            </span>
+            <Logo width={32} height={32} />
           </Link>
 
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
             <Clock3 className="h-4 w-4" />
             Skill Assessment
           </div>
+
+          <span className="text-xs font-medium text-slate-400">
+            Step 3 of 3
+          </span>
         </div>
       </header>
 

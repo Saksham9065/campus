@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Loader2,
+  LogOut,
   RefreshCw,
   Sparkles,
   TrendingUp,
@@ -37,7 +38,7 @@ export default function InstitutionPage() {
 }
 
 function InstitutionDashboard() {
-  const { profile } = useAuth();
+  const { logout, profile } = useAuth();
 
   const [analytics, setAnalytics] =
     useState<InstitutionAnalytics | null>(
@@ -192,6 +193,14 @@ function InstitutionDashboard() {
             >
               Institution Profile
             </Link>
+
+            <button
+              onClick={() => logout()}
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </button>
           </div>
         </div>
       </header>

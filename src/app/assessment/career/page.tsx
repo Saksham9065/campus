@@ -11,13 +11,13 @@ import {
   Check,
   Cloud,
   Code2,
-  Network,
   Palette,
   Shield,
   Sparkles,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { updateUserProfile } from "@/lib/users";
 
@@ -28,7 +28,6 @@ const careers = [
     description:
       "Turn data into insights, dashboards and business decisions.",
     icon: BarChart3,
-    skills: ["SQL", "Python", "Statistics", "Data Visualization"],
   },
   {
     id: "Software Developer",
@@ -36,7 +35,6 @@ const careers = [
     description:
       "Build modern web applications and scalable software systems.",
     icon: Code2,
-    skills: ["JavaScript", "React", "Node.js", "Git"],
   },
   {
     id: "AI/ML Engineer",
@@ -44,7 +42,6 @@ const careers = [
     description:
       "Build intelligent systems using machine learning and data.",
     icon: Brain,
-    skills: ["Python", "Machine Learning", "Statistics", "NumPy"],
   },
   {
     id: "Cloud Engineer",
@@ -52,7 +49,6 @@ const careers = [
     description:
       "Design, deploy and manage reliable cloud infrastructure.",
     icon: Cloud,
-    skills: ["Cloud", "Linux", "Networking", "DevOps"],
   },
   {
     id: "Cybersecurity Analyst",
@@ -60,7 +56,6 @@ const careers = [
     description:
       "Protect systems, networks and data from security threats.",
     icon: Shield,
-    skills: ["Networking", "Linux", "Cybersecurity", "Python"],
   },
   {
     id: "UI/UX Designer",
@@ -68,7 +63,6 @@ const careers = [
     description:
       "Create intuitive digital experiences centered around users.",
     icon: Palette,
-    skills: ["UI Design", "UX Research", "Figma", "Design Thinking"],
   },
 ];
 
@@ -94,9 +88,7 @@ function CareerPageContent() {
       });
 
       router.push(
-        `/assessment/questions?role=${encodeURIComponent(
-          selected
-        )}`
+        `/assessment/preferences?role=${encodeURIComponent(selected)}`
       );
     } catch {
       setSaving(false);
@@ -111,22 +103,16 @@ function CareerPageContent() {
             href="/dashboard"
             className="flex items-center gap-3"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-              <Network className="h-4 w-4" />
-            </div>
-
-            <span className="font-bold">
-              Campus<span className="text-indigo-600">Link</span>
-            </span>
+            <Logo width={32} height={32} />
           </Link>
 
           <span className="hidden text-xs font-medium text-slate-400 sm:block">
-            Step 1 of 2
+            Step 1 of 3
           </span>
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 lg:py-14">
+      <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 lg:py-14">
         <Link
           href="/dashboard"
           className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900"
@@ -135,7 +121,7 @@ function CareerPageContent() {
           Dashboard
         </Link>
 
-        <div className="mt-8 max-w-2xl">
+        <div className="mt-8">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50">
             <Sparkles className="h-5 w-5 text-indigo-600" />
           </div>
@@ -190,41 +176,20 @@ function CareerPageContent() {
                   {career.title}
                 </h2>
 
-                <p className="mt-2 min-h-[48px] text-sm leading-6 text-slate-500">
+                <p className="mt-2 text-sm leading-6 text-slate-500">
                   {career.description}
                 </p>
-
-                <div className="mt-5 flex flex-wrap gap-1.5">
-                  {career.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="rounded-lg bg-white px-2.5 py-1 text-[10px] font-semibold text-slate-500 shadow-sm"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
               </button>
             );
           })}
         </div>
 
-        <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-5 sm:flex-row">
-          <div>
-            <p className="text-sm font-bold text-slate-900">
-              Ready to discover your skill level?
-            </p>
-
-            <p className="mt-1 text-xs text-slate-500">
-              The assessment takes only a few minutes.
-            </p>
-          </div>
-
+        <div className="mt-8 flex justify-end">
           <button
             type="button"
             disabled={!selected || saving}
             onClick={continueAssessment}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? "Saving..." : "Continue"}
             {!saving && (

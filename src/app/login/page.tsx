@@ -92,8 +92,8 @@ export default function LoginPage() {
       <div className="grid min-h-screen lg:grid-cols-[1fr_0.9fr]">
         {/* LEFT */}
         <section className="relative hidden overflow-hidden bg-slate-950 lg:block">
-          <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-indigo-600/20 blur-[120px]" />
-          <div className="absolute -bottom-32 -right-32 h-[500px] w-[500px] rounded-full bg-cyan-500/10 blur-[120px]" />
+          <div className="absolute -left-32 -top-32 h-125 w-125 rounded-full bg-indigo-600/20 blur-[120px]" />
+          <div className="absolute -bottom-32 -right-32 h-125 w-125 rounded-full bg-cyan-500/10 blur-[120px]" />
 
           <div className="relative flex h-full flex-col justify-between p-12 xl:p-16">
             <Link

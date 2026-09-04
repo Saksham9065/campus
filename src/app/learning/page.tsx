@@ -8,18 +8,21 @@ import {
   CheckCircle2,
   Clock3,
   Loader2,
-  Network,
   Play,
   Sparkles,
   Target,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 
 import {
   recommendLearningPrograms,
+  learningPrograms,
+  getProgramById,
   type LearningProgram,
+  type Lesson,
 } from "@/lib/learningEngine";
 
 import {
@@ -64,6 +67,9 @@ function LearningContent() {
         (data) => {
           setEnrollments(data);
           setLoading(false);
+        },
+        () => {
+          setLoading(false);
         }
       );
 
@@ -80,9 +86,18 @@ function LearningContent() {
     const gaps = getSkillGaps(skills);
 
     return recommendLearningPrograms(
-      gaps
+      gaps,
+      learningPrograms,
+      {
+        careerRole: profile?.careerRole,
+        domains: profile?.assessmentDomain,
+      }
     );
-  }, [profile?.skillScores]);
+  }, [
+    profile?.skillScores,
+    profile?.careerRole,
+    profile?.assessmentDomain,
+  ]);
 
   const enrolledIds = new Set(
     enrollments.map(
@@ -190,24 +205,24 @@ function LearningContent() {
             href="/dashboard"
             className="flex items-center gap-3"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-              <Network className="h-4 w-4" />
-            </div>
-
-            <span className="font-bold">
-              Campus
-              <span className="text-indigo-600">
-                Link
-              </span>
-            </span>
+            <Logo width={32} height={32} />
           </Link>
 
-          <Link
-            href="/roadmap"
-            className="text-xs font-bold text-slate-500 hover:text-indigo-600"
-          >
-            My roadmap →
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/dashboard"
+              className="text-xs font-bold text-slate-500 hover:text-indigo-600"
+            >
+              Dashboard
+            </Link>
+
+            <Link
+              href="/roadmap"
+              className="text-xs font-bold text-slate-500 hover:text-indigo-600"
+            >
+              My roadmap →
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -289,57 +304,66 @@ function LearningContent() {
 
         {activeTab ===
           "recommended" && (
-          <section className="mt-8">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-                Based on your skill gaps
-              </p>
+           <section className="mt-8">
+             <div>
+               <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                 Based on your career, preferences and skill gaps
+               </p>
 
-              <h2 className="mt-2 text-2xl font-bold text-slate-950">
-                Recommended programs
-              </h2>
+               <h2 className="mt-2 text-2xl font-bold text-slate-950">
+                 Recommended programs
+               </h2>
 
-              <p className="mt-1 text-xs text-slate-400">
-                Prioritized by how many of your current gaps each program addresses.
-              </p>
-            </div>
+               <p className="mt-1 text-xs text-slate-400">
+                 Prioritized by career match, domain relevance and how many of your current gaps each program addresses.
+               </p>
+             </div>
 
-            {recommendations.length ===
-            0 ? (
-              <NoRecommendations />
-            ) : (
-              <div className="mt-6 grid gap-5 md:grid-cols-2">
-                {recommendations
-                  .slice(0, 6)
-                  .map((item) => (
-                    <ProgramCard
-                      key={
-                        item.program.id
-                      }
-                      program={
-                        item.program
-                      }
-                      matchingSkills={
-                        item.matchingSkills
-                      }
-                      enrolled={enrolledIds.has(
-                        item.program.id
-                      )}
-                      enrolling={
-                        enrolling ===
-                        item.program.id
-                      }
-                      onEnroll={() =>
-                        handleEnroll(
-                          item.program
-                        )
-                      }
-                    />
-                  ))}
-              </div>
-            )}
-          </section>
-        )}
+             {recommendations.length ===
+             0 ? (
+               <NoRecommendations />
+             ) : (
+               <div className="mt-6 grid gap-5 md:grid-cols-2">
+                 {recommendations
+                   .slice(0, 6)
+                   .map((item) => (
+                     <ProgramCard
+                       key={
+                         item.program.id
+                       }
+                       program={
+                         item.program
+                       }
+                       matchingSkills={
+                         item.matchingSkills
+                       }
+                       careerMatch={
+                         item.careerMatch
+                       }
+                       matchingDomains={
+                         item.matchingDomains
+                       }
+                       lessons={
+                         item.program.lessons
+                       }
+                       enrolled={enrolledIds.has(
+                         item.program.id
+                       )}
+                       enrolling={
+                         enrolling ===
+                         item.program.id
+                       }
+                       onEnroll={() =>
+                         handleEnroll(
+                           item.program
+                         )
+                       }
+                     />
+                   ))}
+               </div>
+             )}
+           </section>
+         )}
 
         {activeTab ===
           "my-learning" && (
@@ -366,19 +390,30 @@ function LearningContent() {
             ) : (
               <div className="mt-6 space-y-4">
                 {enrollments.map(
-                  (enrollment) => (
-                    <EnrollmentCard
-                      key={
-                        enrollment.id
-                      }
-                      enrollment={
-                        enrollment
-                      }
-                      onProgress={
-                        handleProgress
-                      }
-                    />
-                  )
+                  (enrollment) => {
+                    const program =
+                      getProgramById(
+                        enrollment.programId
+                      );
+
+                    const lessons =
+                      program?.lessons || [];
+
+                    return (
+                      <EnrollmentCard
+                        key={
+                          enrollment.id
+                        }
+                        enrollment={
+                          enrollment
+                        }
+                        lessons={lessons}
+                        onProgress={
+                          handleProgress
+                        }
+                      />
+                    );
+                  }
                 )}
               </div>
             )}
@@ -418,16 +453,26 @@ function LearningStat({
 function ProgramCard({
   program,
   matchingSkills,
+  careerMatch,
+  matchingDomains,
+  lessons,
   enrolled,
   enrolling,
   onEnroll,
 }: {
   program: LearningProgram;
   matchingSkills: string[];
+  careerMatch: boolean;
+  matchingDomains: string[];
+  lessons: Lesson[];
   enrolled: boolean;
   enrolling: boolean;
   onEnroll: () => void;
 }) {
+  const totalLessons = lessons.length;
+  const previewLessons = lessons.slice(0, 3);
+  const remainingLessons = Math.max(0, totalLessons - 3);
+
   return (
     <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
       <div className="flex items-start justify-between gap-4">
@@ -435,13 +480,29 @@ function ProgramCard({
           <BookOpen className="h-5 w-5 text-indigo-600" />
         </div>
 
-        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
-          {matchingSkills.length} gap
-          {matchingSkills.length > 1
-            ? "s"
-            : ""}{" "}
-          covered
-        </span>
+        <div className="flex flex-col items-end gap-1.5">
+          {careerMatch && (
+            <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-700">
+              Career match
+            </span>
+          )}
+
+          {matchingSkills.length > 0 && (
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
+              {matchingSkills.length} gap
+              {matchingSkills.length > 1 ? "s" : ""}{" "}
+              covered
+            </span>
+          )}
+
+          {matchingDomains.length > 0 && (
+            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">
+              {matchingDomains.length} domain
+              {matchingDomains.length > 1 ? "s" : ""}
+              matched
+            </span>
+          )}
+        </div>
       </div>
 
       <h3 className="mt-5 text-lg font-bold text-slate-950">
@@ -456,23 +517,78 @@ function ProgramCard({
         {program.description}
       </p>
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        {program.skills.map(
-          (skill) => (
-            <span
-              key={skill}
-              className={`rounded-lg px-2.5 py-1.5 text-[10px] font-semibold ${
-                matchingSkills.includes(
-                  skill
-                )
-                  ? "bg-indigo-50 text-indigo-700"
-                  : "bg-slate-50 text-slate-500"
-              }`}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span className="inline-flex items-center rounded-lg bg-slate-50 px-2.5 py-1.5 text-[10px] font-semibold text-slate-500">
+          {program.career}
+        </span>
+        {program.domains.map((domain) => (
+          <span
+            key={domain}
+            className="inline-flex items-center rounded-lg bg-slate-50 px-2.5 py-1.5 text-[10px] font-semibold text-slate-400"
+          >
+            {domain}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            Lessons
+          </p>
+
+          <span className="text-[10px] font-semibold text-slate-400">
+            {totalLessons} lesson
+            {totalLessons !== 1 ? "s" : ""}
+          </span>
+        </div>
+
+        <div className="mt-3 space-y-2">
+          {previewLessons.map((lesson, index) => (
+            <div
+              key={lesson.id}
+              className="flex items-start gap-2"
             >
-              {skill}
-            </span>
-          )
-        )}
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-slate-500">
+                {index + 1}
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-slate-700">
+                  {lesson.title}
+                </p>
+
+                <p className="text-[10px] text-slate-400">
+                  {lesson.duration}
+                </p>
+              </div>
+            </div>
+          ))}
+
+          {remainingLessons > 0 && (
+            <p className="text-[10px] font-semibold text-slate-400">
+              +{remainingLessons} more lesson
+              {remainingLessons !== 1
+                ? "s"
+                : ""}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        {program.skills.map((skill) => (
+          <span
+            key={skill}
+            className={`rounded-lg px-2.5 py-1.5 text-[10px] font-semibold ${
+              matchingSkills.includes(skill)
+                ? "bg-indigo-50 text-indigo-700"
+                : "bg-slate-50 text-slate-500"
+            }`}
+          >
+            {skill}
+          </span>
+        ))}
       </div>
 
       <div className="mt-5 flex items-center gap-4 border-t border-slate-100 pt-4 text-[10px] font-semibold text-slate-400">
@@ -484,41 +600,45 @@ function ProgramCard({
         <span>{program.level}</span>
       </div>
 
-      <button
-        disabled={enrolled || enrolling}
-        onClick={onEnroll}
-        className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold ${
-          enrolled
-            ? "bg-emerald-50 text-emerald-700"
-            : "bg-indigo-600 text-white hover:bg-indigo-700"
-        } disabled:cursor-not-allowed`}
-      >
-        {enrolling ? (
-          <>
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            Enrolling...
-          </>
-        ) : enrolled ? (
-          <>
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            Enrolled
-          </>
-        ) : (
-          <>
-            Start learning
-            <ArrowRight className="h-3.5 w-3.5" />
-          </>
-        )}
-      </button>
+      {!enrolled ? (
+        <button
+          disabled={enrolling}
+          onClick={onEnroll}
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-xs font-bold text-white hover:bg-indigo-700 disabled:cursor-not-allowed"
+        >
+          {enrolling ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Enrolling...
+            </>
+          ) : (
+            <>
+              Start learning
+              <ArrowRight className="h-3.5 w-3.5" />
+            </>
+          )}
+        </button>
+      ) : (
+        <Link
+          href={`/learning/${program.id}`}
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-50 py-3 text-xs font-bold text-indigo-700 hover:bg-indigo-100"
+        >
+          <Play className="h-3.5 w-3.5" />
+          Go to lessons
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      )}
     </article>
   );
 }
 
 function EnrollmentCard({
   enrollment,
+  lessons,
   onProgress,
 }: {
   enrollment: Enrollment;
+  lessons: Lesson[];
   onProgress: (
     enrollment: Enrollment,
     progress: number
@@ -526,6 +646,10 @@ function EnrollmentCard({
 }) {
   const completed =
     enrollment.status === "completed";
+
+  const totalLessons = lessons.length;
+  const previewLessons = lessons.slice(0, 3);
+  const remainingLessons = Math.max(0, totalLessons - 3);
 
   return (
     <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -582,8 +706,66 @@ function EnrollmentCard({
         </div>
       </div>
 
+      {totalLessons > 0 && (
+        <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              Lessons
+            </p>
+
+            <span className="text-[10px] font-semibold text-slate-400">
+              {totalLessons} lesson
+              {totalLessons !== 1 ? "s" : ""}
+            </span>
+          </div>
+
+          <div className="mt-3 space-y-2">
+            {previewLessons.map(
+              (lesson, index) => (
+                <div
+                  key={lesson.id}
+                  className="flex items-start gap-2"
+                >
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-slate-500">
+                    {index + 1}
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-slate-700">
+                      {lesson.title}
+                    </p>
+
+                    <p className="text-[10px] text-slate-400">
+                      {lesson.duration}
+                    </p>
+                  </div>
+                </div>
+              )
+            )}
+
+            {remainingLessons > 0 && (
+              <p className="text-[10px] font-semibold text-slate-400">
+                +{remainingLessons} more lesson
+                {remainingLessons !== 1
+                  ? "s"
+                  : ""}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      <Link
+        href={`/learning/${enrollment.programId}`}
+        className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-xs font-bold text-white hover:bg-indigo-700"
+      >
+        <Play className="h-3.5 w-3.5" />
+        Continue learning
+        <ArrowRight className="h-3.5 w-3.5" />
+      </Link>
+
       {!completed && (
-        <div className="mt-5">
+        <div className="mt-4">
           <p className="text-[10px] font-bold text-slate-400">
             Update progress
           </p>
@@ -599,7 +781,11 @@ function EnrollmentCard({
                       value
                     )
                   }
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-500 hover:border-indigo-300 hover:text-indigo-600"
+                  disabled={
+                    enrollment.progress >=
+                    value
+                  }
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-600 transition hover:border-indigo-200 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {value}%
                 </button>

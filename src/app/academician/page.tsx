@@ -17,6 +17,7 @@ import {
   Handshake,
   Lightbulb,
   Loader2,
+  LogOut,
   Search,
   Sparkles,
   Users,
@@ -38,7 +39,7 @@ export default function AcademicianPage() {
 }
 
 function AcademicianDashboard() {
-  const { profile } = useAuth();
+  const { logout, profile } = useAuth();
 
   const [opportunities, setOpportunities] = useState<
     AcademiaOpportunity[]
@@ -134,13 +135,21 @@ function AcademicianDashboard() {
             >
               Profile
             </Link>
+
+            <button
+              onClick={() => logout()}
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </button>
           </div>
         </div>
       </header>
 
       <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
         {/* Hero */}
-        <section className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-700 via-indigo-600 to-cyan-600 p-7 text-white shadow-xl md:p-10">
+        <section className="overflow-hidden rounded-4xl bg-linear-to-br from-indigo-700 via-indigo-600 to-cyan-600 p-7 text-white shadow-xl md:p-10">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold backdrop-blur">
               <GraduationCap className="h-4 w-4" />

@@ -13,3 +13,7 @@ export const gemini = new GoogleGenAI({
 });
 
 export const GEMINI_MODEL = "gemini-3.6-flash";
+
+export function getGeminiModelName() {
+  return GEMINI_MODEL;
+}

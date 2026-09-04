@@ -15,11 +15,11 @@ import {
   CheckCircle2,
   FileText,
   Loader2,
-  Network,
   Sparkles,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 
 import {
@@ -114,6 +114,11 @@ function ApplyPageContent({
 
     if (!user || !opportunity) return;
 
+    if (!profile?.resumeUrl) {
+      setError("Please upload your resume before applying.");
+      return;
+    }
+
     setError("");
     setSubmitting(true);
 
@@ -136,10 +141,15 @@ function ApplyPageContent({
           opportunity.company,
         companyId:
           opportunity.companyId || "",
-        resumeUrl:
-          profile?.resumeUrl,
-        resumeName:
-          profile?.resumeName,
+
+        ...(profile?.resumeUrl
+          ? { resumeUrl: profile.resumeUrl }
+          : {}),
+
+        ...(profile?.resumeName
+          ? { resumeName: profile.resumeName }
+          : {}),
+
         coverLetter:
           coverLetter.trim(),
       });
@@ -198,16 +208,7 @@ function ApplyPageContent({
               href="/dashboard"
               className="flex items-center gap-3"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-                <Network className="h-4 w-4" />
-              </div>
-
-              <span className="font-bold">
-                Campus
-                <span className="text-indigo-600">
-                  Link
-                </span>
-              </span>
+              <Logo width={32} height={32} />
             </Link>
           </div>
         </header>
@@ -295,10 +296,7 @@ function ApplyPageContent({
           </Link>
 
           <span className="font-bold">
-            Campus
-            <span className="text-indigo-600">
-              Link
-            </span>
+            <Logo width={32} height={32} />
           </span>
         </div>
       </header>
@@ -306,7 +304,7 @@ function ApplyPageContent({
       <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8">
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
           {/* Form */}
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <section className="rounded-4xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50">
               <FileText className="h-5 w-5 text-indigo-600" />
             </div>
@@ -372,9 +370,9 @@ function ApplyPageContent({
               )}
 
               <button
-                disabled={submitting}
+                disabled={submitting || !profile?.resumeUrl}
                 type="submit"
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? (
                   <>
@@ -392,7 +390,7 @@ function ApplyPageContent({
           </section>
 
           {/* Opportunity */}
-          <aside className="h-fit rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+          <aside className="h-fit rounded-4xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-white">
               <BriefcaseBusiness className="h-5 w-5" />
             </div>

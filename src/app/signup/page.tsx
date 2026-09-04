@@ -174,7 +174,13 @@ export default function SignupPage() {
           : "Unable to create your account.";
 
       console.error("Signup error:", rawError);
-      setError(rawError || "Unable to create your account. Please try again.");
+
+      const friendlyError =
+        rawError.includes("auth/email-already-in-use")
+          ? "This email is already registered. Please sign in instead."
+          : rawError || "Unable to create your account. Please try again.";
+
+      setError(friendlyError);
     } finally {
       setLoading(false);
     }
@@ -185,8 +191,8 @@ export default function SignupPage() {
       <div className="grid min-h-screen lg:grid-cols-[0.72fr_1.28fr]">
         {/* LEFT PANEL */}
         <section className="relative hidden overflow-hidden bg-slate-950 lg:block">
-          <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-indigo-600/20 blur-[120px]" />
-          <div className="absolute bottom-0 right-0 h-[450px] w-[450px] rounded-full bg-cyan-500/10 blur-[120px]" />
+          <div className="absolute -left-32 -top-32 h-125 w-125 rounded-full bg-indigo-600/20 blur-[120px]" />
+          <div className="absolute bottom-0 right-0 h-112.5 w-112.5 rounded-full bg-cyan-500/10 blur-[120px]" />
 
           <div className="relative flex h-full flex-col justify-between p-12 xl:p-16">
             <Link

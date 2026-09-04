@@ -17,7 +17,6 @@ import {
   ShieldCheck,
   Sparkles,
   Target,
-  UserRound,
   Users,
   X,
 } from "lucide-react";
@@ -125,7 +124,7 @@ export default function Home() {
 
   if (landingPhase !== "done") {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white">
+      <div className="fixed inset-0 z-100 flex items-center justify-center bg-white">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={
@@ -145,15 +144,7 @@ export default function Home() {
           }}
           className="flex flex-col items-center gap-6"
         >
-          <Logo width={300} height={300} />
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-base font-semibold uppercase tracking-[0.35em] text-slate-500"
-          >
-            Skill Intelligence
-          </motion.p>
+          <Logo width={300} height={300} showText={false} />
         </motion.div>
       </div>
     );
@@ -163,8 +154,8 @@ export default function Home() {
     <main className="min-h-screen overflow-hidden bg-[#f8fafc] text-slate-900">
       {/* Background */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute left-[10%] top-[5%] h-[300px] w-[300px] rounded-full bg-indigo-200/30 blur-[120px] sm:h-[450px] sm:w-[450px]" />
-        <div className="absolute right-[5%] top-[20%] h-[300px] w-[300px] rounded-full bg-cyan-200/20 blur-[120px] sm:h-[400px] sm:w-[400px]" />
+        <div className="absolute left-[10%] top-[5%] h-75 w-75 rounded-full bg-indigo-200/30 blur-[120px] sm:h-112.5 sm:w-112.5" />
+        <div className="absolute right-[5%] top-[20%] h-75 w-75 rounded-full bg-cyan-200/20 blur-[120px] sm:h-100 sm:w-100" />
       </div>
 
       
@@ -179,6 +170,13 @@ export default function Home() {
 
             <div className="hidden items-center gap-4 md:gap-7 lg:flex">
               <Link
+                href="/dashboard"
+                className="text-sm font-medium text-slate-600 transition hover:text-indigo-600"
+              >
+                Dashboard
+              </Link>
+
+              <Link
                 href="/assessment/career"
                 className="text-sm font-medium text-slate-600 transition hover:text-indigo-600"
               >
@@ -192,20 +190,13 @@ export default function Home() {
                 Roadmap
               </Link>
 
-              <Link
-                href="/opportunities"
-                className="text-sm font-medium text-slate-600 transition hover:text-indigo-600"
-              >
-                Opportunities
-              </Link>
-
-              <Link
-                href="/portfolio"
-                className="text-sm font-medium text-slate-600 transition hover:text-indigo-600"
-              >
-                Skill Passport
-              </Link>
-            </div>
+               <Link
+                 href="/opportunities"
+                 className="text-sm font-medium text-slate-600 transition hover:text-indigo-600"
+               >
+                 Opportunities
+               </Link>
+             </div>
 
             <div className="flex items-center gap-2">
               <div className="md:hidden">
@@ -289,9 +280,9 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="relative"
             >
-              <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-r from-indigo-500/10 via-blue-500/10 to-cyan-500/10 blur-3xl" />
+              <div className="absolute -inset-8 rounded-[3rem] bg-linear-to-r from-indigo-500/10 via-blue-500/10 to-cyan-500/10 blur-3xl" />
 
-              <div className="relative rounded-[2rem] border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-300/30">
+              <div className="relative rounded-4xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-300/30">
                 {/* browser bar */}
                 <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
                   <div className="h-2.5 w-2.5 rounded-full bg-slate-200" />
@@ -323,7 +314,7 @@ export default function Home() {
                     </div>
 
                     <div className="mt-7 h-2 overflow-hidden rounded-full bg-white/10">
-                      <div className="h-full w-[12%] rounded-full bg-gradient-to-r from-indigo-400 to-cyan-400" />
+                      <div className="h-full w-[12%] rounded-full bg-linear-to-r from-indigo-400 to-cyan-400" />
                     </div>
 
                     <p className="mt-3 text-[10px] text-slate-400">
@@ -480,7 +471,7 @@ export default function Home() {
               return (
                 <div
                   key={item.title}
-                  className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 transition hover:bg-white/[0.08]"
+                  className="rounded-3xl border border-white/10 bg-white/4 p-6 transition hover:bg-white/8"
                 >
                   <Icon className="h-6 w-6 text-indigo-400" />
 
@@ -498,7 +489,7 @@ export default function Home() {
 
       {/* CTA */}
       <section className="px-4 py-24 sm:px-6">
-        <div className="mx-auto max-w-5xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 px-7 py-14 text-center text-white shadow-2xl shadow-indigo-500/20 sm:px-14">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-4xl bg-linear-to-br from-indigo-600 via-blue-600 to-cyan-500 px-7 py-14 text-center text-white shadow-2xl shadow-indigo-500/20 sm:px-14">
           <ShieldCheck className="mx-auto h-9 w-9" />
 
           <h2 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
@@ -519,22 +510,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
-      {/* FOOTER */}
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-slate-500 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-          <div className="flex items-center gap-2 font-bold text-slate-900">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 text-white">
-              <Network className="h-4 w-4" />
-            </div>
-            CampusLink
-          </div>
-
-          <p>AI-powered skill intelligence for academia and industry.</p>
-
-          <p>© 2026 CampusLink</p>
-        </div>
-      </footer>
     </main>
   );
 }
@@ -602,6 +577,9 @@ function MobileMenu() {
             </div>
 
             <div className="mt-2 space-y-1">
+              <MobileLink href="/dashboard" onSelect={() => setOpen(false)}>
+                Dashboard
+              </MobileLink>
               <MobileLink href="/assessment/career" onSelect={() => setOpen(false)}>
                 Assessment
               </MobileLink>
@@ -610,9 +588,6 @@ function MobileMenu() {
               </MobileLink>
               <MobileLink href="/opportunities" onSelect={() => setOpen(false)}>
                 Opportunities
-              </MobileLink>
-              <MobileLink href="/portfolio" onSelect={() => setOpen(false)}>
-                Skill Passport
               </MobileLink>
             </div>
 

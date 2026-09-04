@@ -13,11 +13,11 @@ import {
   CheckCircle2,
   Download,
   Loader2,
-  Network,
   ShieldCheck,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 
 import {
@@ -59,25 +59,25 @@ function CertificatesContent() {
     <main className="min-h-screen bg-[#f8fafc]">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-          <Link
-            href="/learning"
-            className="inline-flex items-center gap-2 text-xs font-bold text-slate-500"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Learning
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/learning"
+              className="inline-flex items-center gap-2 text-xs font-bold text-slate-500"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Learning
+            </Link>
+
+            <Link
+              href="/dashboard"
+              className="text-xs font-bold text-slate-500 hover:text-indigo-600"
+            >
+              Dashboard
+            </Link>
+          </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 text-white">
-              <Network className="h-3.5 w-3.5" />
-            </div>
-
-            <span className="font-bold">
-              Campus
-              <span className="text-indigo-600">
-                Link
-              </span>
-            </span>
+            <Logo width={32} height={32} />
           </div>
         </div>
       </header>

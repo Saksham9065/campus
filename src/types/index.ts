@@ -70,6 +70,11 @@ export type CampusUser = {
   resumeUrl?: string;
   resumeName?: string;
 
+  assessmentDomain?: string[];
+  experienceYears?: number;
+  experienceMonths?: number;
+  preferredQuestionCount?: number;
+
   createdAt?: unknown;
   updatedAt?: unknown;
 };

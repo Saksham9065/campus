@@ -78,6 +78,10 @@ function PlacementReadinessContent() {
           setApplications(items);
           applicationsLoaded = true;
           checkLoaded();
+        },
+        () => {
+          applicationsLoaded = true;
+          setLoading(false);
         }
       );
 
@@ -88,6 +92,10 @@ function PlacementReadinessContent() {
           setEnrollments(items);
           enrollmentsLoaded = true;
           checkLoaded();
+        },
+        () => {
+          enrollmentsLoaded = true;
+          setLoading(false);
         }
       );
 
@@ -147,7 +155,7 @@ function PlacementReadinessContent() {
       </header>
 
       <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
-        <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-indigo-950 to-indigo-800 p-7 text-white shadow-2xl shadow-indigo-500/10 sm:p-10">
+        <section className="overflow-hidden rounded-3xl bg-linear-to-br from-slate-950 via-indigo-950 to-indigo-800 p-7 text-white shadow-2xl shadow-indigo-500/10 sm:p-10">
           <div className="grid gap-10 lg:grid-cols-[1fr_320px] lg:items-center">
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-indigo-100">
@@ -183,9 +191,9 @@ function PlacementReadinessContent() {
             </div>
 
             <div className="flex justify-center">
-              <div className="relative flex h-56 w-56 items-center justify-center rounded-full border-[16px] border-white/10">
+              <div className="relative flex h-56 w-56 items-center justify-center rounded-full border-16 border-white/10">
                 <div
-                  className="absolute inset-0 rounded-full border-[16px] border-indigo-400"
+                  className="absolute inset-0 rounded-full border-16 border-indigo-400"
                   style={{
                     clipPath: `polygon(0 0, 100% 0, 100% ${
                       intelligence.score

@@ -9,6 +9,7 @@ import {
   Loader2,
   PlusCircle,
   Search,
+  Trash2,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -16,6 +17,9 @@ import { useAuth } from "@/context/AuthContext";
 import {
   getIndustryOpportunities,
 } from "@/lib/industry";
+import {
+  deleteOpportunity,
+} from "@/lib/firestoreOpportunities";
 
 import type { JobOpportunity } from "@/lib/jobMatcher";
 
@@ -35,6 +39,8 @@ function Opportunities() {
 
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] =
+    useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -73,6 +79,38 @@ function Opportunities() {
       .toLowerCase()
       .includes(term);
   });
+
+  async function handleDelete(
+    opp: JobOpportunity
+  ) {
+    const confirmed =
+      confirm(
+        `Remove "${opp.title}"? This will also delete all ${opp.title} applications. This action cannot be undone.`
+      );
+
+    if (!confirmed) return;
+
+    setDeletingId(opp.id);
+
+    try {
+      await deleteOpportunity(opp.id);
+
+      setOpportunities((current) =>
+        current.filter(
+          (item) => item.id !== opp.id
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to remove opportunity."
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -200,15 +238,26 @@ function Opportunities() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span
-                      className={`rounded-xl px-3 py-2 text-xs font-bold ${
-                        opp.status === "open"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
+                    <Link
+                      href={`/industry/opportunities/${opp.id}`}
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700"
                     >
-                      {opp.status}
-                    </span>
+                      Manage
+                    </Link>
+
+                    <button
+                      onClick={() =>
+                        handleDelete(opp)
+                      }
+                      disabled={deletingId === opp.id}
+                      className="rounded-xl p-2 text-rose-500 hover:bg-rose-50 disabled:opacity-50"
+                    >
+                      {deletingId === opp.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
                 </div>
               ))}

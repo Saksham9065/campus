@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { AuthProvider } from "@/context/AuthContext";
+import { CopilotProvider } from "@/lib/copilotContext";
+import { CopilotWidget } from "@/components/CopilotWidget";
+
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "CampusLink — Skill Intelligence Platform",
@@ -22,7 +26,11 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth">
       <body>
         <AuthProvider>
-          {children}
+          <CopilotProvider>
+            {children}
+            <CopilotWidget />
+          </CopilotProvider>
+          <Footer />
         </AuthProvider>
       </body>
     </html>

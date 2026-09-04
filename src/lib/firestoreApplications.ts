@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -60,7 +61,7 @@ export async function hasApplied(
 
 export async function createApplication(
   data: CreateApplicationData
-) {
+): Promise<string> {
   const alreadyApplied =
     await hasApplied(
       data.studentId,
@@ -73,15 +74,38 @@ export async function createApplication(
     );
   }
 
-  return addDoc(
+  const applicationData = {
+    studentId: data.studentId,
+    studentName: data.studentName,
+    studentEmail: data.studentEmail,
+    opportunityId: data.opportunityId,
+    opportunityTitle: data.opportunityTitle,
+    company: data.company,
+    companyId: data.companyId,
+
+    ...(data.resumeUrl !== undefined && {
+      resumeUrl: data.resumeUrl,
+    }),
+
+    ...(data.resumeName !== undefined && {
+      resumeName: data.resumeName,
+    }),
+
+    ...(data.coverLetter !== undefined && {
+      coverLetter: data.coverLetter,
+    }),
+
+    status: "Applied" as const,
+    appliedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  const docRef = await addDoc(
     collection(db, "applications"),
-    {
-      ...data,
-      status: "Applied",
-      appliedAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    }
+    applicationData
   );
+
+  return docRef.id;
 }
 
 export async function getStudentApplications(
@@ -124,7 +148,8 @@ export async function getOpportunityApplications(
 
 export function subscribeToStudentApplications(
   studentId: string,
-  callback: (applications: Application[]) => void
+  callback: (applications: Application[]) => void,
+  onError?: (error: Error) => void
 ) {
   const q = query(
     collection(db, "applications"),
@@ -145,6 +170,7 @@ export function subscribeToStudentApplications(
     },
     (error) => {
       console.error("Application listener error:", error);
+      if (onError) onError(error as Error);
     }
   );
 }
@@ -231,6 +257,24 @@ export async function getApplication(
     id: snapshot.id,
     ...snapshot.data(),
   } as Application;
+}
+
+export async function deleteApplication(
+  applicationId: string
+) {
+  const applicationRef = doc(
+    db,
+    "applications",
+    applicationId
+  );
+
+  const snapshot = await getDoc(applicationRef);
+
+  if (!snapshot.exists()) {
+    throw new Error("Application not found.");
+  }
+
+  await deleteDoc(applicationRef);
 }
 
 export async function updateApplicationDetails(

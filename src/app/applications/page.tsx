@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import {
   ArrowRight,
@@ -10,14 +11,16 @@ import {
   CheckCircle2,
   Clock3,
   Loader2,
-  Network,
+  Trash2,
   XCircle,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 
 import {
+  deleteApplication,
   subscribeToStudentApplications,
 } from "@/lib/firestoreApplications";
 
@@ -28,6 +31,7 @@ import type {
 
 function ApplicationsContent() {
   const { user } = useAuth();
+  const router = useRouter();
 
   const [applications, setApplications] =
     useState<Application[]>([]);
@@ -44,11 +48,27 @@ function ApplicationsContent() {
         (data) => {
           setApplications(data);
           setLoading(false);
+        },
+        () => {
+          setLoading(false);
         }
       );
 
     return unsubscribe;
   }, [user]);
+
+  async function handleDelete(id: string) {
+    try {
+      await deleteApplication(id);
+      setApplications((prev) =>
+        prev.filter((item) => item.id !== id)
+      );
+    } catch {
+      alert(
+        "Unable to withdraw application. Please try again."
+      );
+    }
+  }
 
   const active =
     applications.filter(
@@ -83,25 +103,25 @@ function ApplicationsContent() {
             href="/dashboard"
             className="flex items-center gap-3"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-              <Network className="h-4 w-4" />
-            </div>
-
-            <span className="font-bold">
-              Campus
-              <span className="text-indigo-600">
-                Link
-              </span>
-            </span>
+            <Logo width={32} height={32} />
           </Link>
 
-          <Link
-            href="/opportunities"
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white"
-          >
-            Find opportunities
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/dashboard"
+              className="text-xs font-bold text-slate-500 hover:text-indigo-600"
+            >
+              Dashboard
+            </Link>
+
+            <Link
+              href="/opportunities"
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white"
+            >
+              Find opportunities
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -157,6 +177,7 @@ function ApplicationsContent() {
                     application={
                       application
                     }
+                    onDelete={handleDelete}
                   />
                 )
               )}
@@ -196,12 +217,20 @@ function Stat({
 
 function ApplicationCard({
   application,
+  onDelete,
 }: {
   application: Application;
+  onDelete?: (id: string) => void;
 }) {
   const rejected =
     application.status ===
     "Rejected";
+
+  const completed =
+    application.status === "Completed";
+
+  const canDelete =
+    !rejected && !completed;
 
   return (
     <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -227,11 +256,26 @@ function ApplicationCard({
           </div>
         </div>
 
-        <StatusBadge
-          status={
-            application.status
-          }
-        />
+        <div className="flex items-center gap-3">
+          <StatusBadge
+            status={
+              application.status
+            }
+          />
+
+          {canDelete && onDelete && (
+            <button
+              type="button"
+              onClick={() =>
+                onDelete(application.id)
+              }
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-200 text-red-600 hover:bg-red-50"
+              title="Withdraw application"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       <ApplicationTimeline
