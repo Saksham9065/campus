@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
   BookOpen,
   CheckCircle2,
+  ChevronDown,
   ChevronRight,
   Clock3,
   Loader2,
@@ -28,6 +29,24 @@ import {
   learningPrograms,
   type LearningProgram,
 } from "@/lib/learningEngine";
+import { updateUserProfile } from "@/lib/users";
+
+const TARGET_ROLES = [
+  "Data Analyst",
+  "Data Scientist",
+  "Data Engineer",
+  "AI/ML Engineer",
+  "AI Engineer",
+  "AI/ML Specialist",
+  "AI/Research Engineer",
+  "Software Engineer",
+  "Software Developer",
+  "Backend Engineer",
+  "Frontend Developer",
+  "Full Stack Developer",
+  "DevOps Engineer",
+  "Security Engineer",
+] as const;
 
 function RoadmapContent() {
   const { user, profile } = useAuth();
@@ -49,6 +68,61 @@ function RoadmapContent() {
     >([]);
 
   const [loading, setLoading] = useState(true);
+
+  const [roleDropdownOpen, setRoleDropdownOpen] =
+    useState(false);
+  const [savingRole, setSavingRole] = useState(false);
+
+  const roleDropdownRef = useRef<HTMLDivElement>(
+    null
+  );
+
+  useEffect(() => {
+    function handleClickOutside(
+      event: MouseEvent
+    ) {
+      if (
+        roleDropdownRef.current &&
+        !roleDropdownRef.current.contains(
+          event.target as Node
+        )
+      ) {
+        setRoleDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+  }, []);
+
+  async function handleRoleChange(
+    newRole: string
+  ) {
+    if (!user || newRole === profile?.careerRole) {
+      setRoleDropdownOpen(false);
+      return;
+    }
+
+    try {
+      setSavingRole(true);
+      await updateUserProfile(user.uid, {
+        careerRole: newRole,
+      });
+    } catch (error) {
+      console.error("Failed to update role", error);
+    } finally {
+      setSavingRole(false);
+      setRoleDropdownOpen(false);
+    }
+  }
 
   useEffect(() => {
     async function loadRoadmap() {
@@ -186,9 +260,70 @@ function RoadmapContent() {
           </p>
 
           {profile?.careerRole && (
-            <div className="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600">
-              <Target className="h-4 w-4 text-indigo-600" />
-              Target role: {profile.careerRole}
+            <div ref={roleDropdownRef} className="relative mt-5 inline-block">
+              <button
+                type="button"
+                onClick={() =>
+                  setRoleDropdownOpen(
+                    !roleDropdownOpen
+                  )
+                }
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-indigo-200"
+              >
+                <Target className="h-4 w-4 text-indigo-600" />
+                Target role: {profile.careerRole}
+                <ChevronDown
+                  className={`h-3.5 w-3.5 text-slate-400 transition ${
+                    roleDropdownOpen
+                      ? "rotate-180"
+                      : ""
+                  }`}
+                />
+              </button>
+
+              {roleDropdownOpen && (
+                <div className="absolute z-20 mt-2 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+                  <div className="p-1.5">
+                    <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Select target role
+                    </p>
+
+                    {TARGET_ROLES.map((role) => {
+                      const active =
+                        role ===
+                        profile?.careerRole;
+
+                      return (
+                        <button
+                          key={role}
+                          type="button"
+                          onClick={() =>
+                            handleRoleChange(
+                              role
+                            )
+                          }
+                          disabled={savingRole}
+                          className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                            active
+                              ? "bg-indigo-50 text-indigo-700"
+                              : "text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          <span className="font-medium">
+                            {role}
+                          </span>
+
+                          {active && (
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-indigo-600">
+                              Current
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
