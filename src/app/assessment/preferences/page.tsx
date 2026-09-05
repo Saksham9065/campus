@@ -53,9 +53,12 @@ const questionOptions = [
 function PreferencesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
-  const role = searchParams.get("role") || "";
+  const role =
+    searchParams.get("role") ||
+    profile?.careerRole ||
+    "Data Analyst";
 
   const [selectedDomains, setSelectedDomains] =
     useState<string[]>([]);
@@ -118,13 +121,7 @@ function PreferencesContent() {
     );
 
     return option ? option.minutes : 25;
-  }, [questionCount]);
-
-  useEffect(() => {
-    if (!role) {
-      router.replace("/assessment/career");
-    }
-  }, [role, router]);
+   }, [questionCount]);
 
   function toggleDomain(item: string) {
     setSelectedDomains((current) =>
@@ -139,7 +136,7 @@ function PreferencesContent() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!user || !role) return;
+    if (!user) return;
 
     if (selectedDomains.length === 0) {
       alert(
@@ -185,18 +182,18 @@ function PreferencesContent() {
           </Link>
 
           <span className="hidden text-xs font-medium text-slate-400 sm:block">
-            Step 2 of 3
+            Step 1 of 2
           </span>
         </div>
       </header>
 
       <div className="mx-auto max-w-2xl px-5 py-10 sm:px-8 lg:py-14">
         <Link
-          href="/assessment/career"
+          href="/dashboard"
           className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900"
         >
           <ArrowLeft className="h-4 w-4" />
-          Change career
+          Dashboard
         </Link>
 
         <div className="mt-8">

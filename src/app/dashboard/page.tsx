@@ -15,6 +15,7 @@ import {
   BriefcaseBusiness,
   CheckCircle2,
   ChevronRight,
+  Home,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -44,13 +45,18 @@ import {
 
 const navigation = [
   {
+    label: "Home",
+    href: "/",
+    icon: Home,
+  },
+  {
     label: "Overview",
     href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
     label: "Skill Assessment",
-    href: "/assessment/career",
+    href: "/assessment/preferences",
     icon: Brain,
   },
   {
@@ -362,7 +368,7 @@ function DashboardContent() {
               </p>
 
               <Link
-                href="/assessment/career"
+                href="/assessment/preferences"
                 className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-indigo-50"
               >
                 Start Skill Assessment
@@ -463,7 +469,7 @@ function DashboardContent() {
 
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
                 {[
-                  ["1", "Choose career", "/assessment/career"],
+                  ["1", "Set preferences", "/assessment/preferences"],
                   ["2", "Take assessment", "/assessment/questions"],
                   ["3", "Get roadmap", "/roadmap"],
                 ].map(([number, title, href]) => (

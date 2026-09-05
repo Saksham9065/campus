@@ -341,7 +341,7 @@ function PlacementReadinessContent() {
 
         <section className="mt-8 grid gap-4 md:grid-cols-3">
           <ActionCard
-            href="/assessment/career"
+             href="/assessment/preferences"
             icon={BarChart3}
             title="Retake Assessment"
             description="Refresh your skill profile with a new assessment."

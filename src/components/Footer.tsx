@@ -4,7 +4,7 @@ import Logo from "./Logo";
 const footerLinks = {
   product: [
     { label: "Features", href: "/" },
-    { label: "Skill Assessment", href: "/assessment/career" },
+    { label: "Skill Assessment", href: "/assessment/preferences" },
     { label: "Learning", href: "/learning" },
     { label: "Opportunities", href: "/opportunities" },
   ],

@@ -115,7 +115,7 @@ function ResultsContent() {
             </p>
 
             <Link
-              href="/assessment/career"
+              href="/assessment/preferences"
               className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white"
             >
               Start Assessment

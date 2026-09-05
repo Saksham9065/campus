@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
@@ -24,6 +25,8 @@ import {
 import Logo from "@/components/Logo";
 
 import { useAuth } from "@/context/AuthContext";
+import type { User as FirebaseUser } from "firebase/auth";
+import type { CampusUser } from "@/types";
 
 const features = [
   {
@@ -31,24 +34,28 @@ const features = [
     title: "AI Skill Intelligence",
     description:
       "Assess your technical and soft skills and understand where you stand.",
+    href: "/assessment/preferences",
   },
   {
     icon: Target,
     title: "Smart Skill Mapping",
     description:
       "Map your skills against careers, industries, jobs and learning paths.",
+    href: "/roadmap",
   },
   {
     icon: BriefcaseBusiness,
     title: "Internships & Jobs",
     description:
       "Discover opportunities ranked according to your actual skill profile.",
+    href: "/opportunities",
   },
   {
     icon: LineChart,
     title: "Placement Intelligence",
     description:
       "Track readiness, applications, interviews and placement outcomes.",
+    href: "/placement-readiness",
   },
 ];
 
@@ -103,6 +110,8 @@ const steps = [
 ];
 
 export default function Home() {
+  const { user, profile } = useAuth();
+
   const [landingPhase, setLandingPhase] = useState<
     "entering" | "visible" | "exiting" | "done"
   >("entering");
@@ -121,6 +130,10 @@ export default function Home() {
       clearTimeout(exitTimer);
     };
   }, []);
+
+  if (user) {
+    return <LoggedInHome user={user} profile={profile} />;
+  }
 
   if (landingPhase !== "done") {
     return (
@@ -177,7 +190,7 @@ export default function Home() {
               </Link>
 
               <Link
-                href="/assessment/career"
+                href="/assessment/preferences"
                 className="text-sm font-medium text-slate-600 transition hover:text-indigo-600"
               >
                 Assessment
@@ -247,7 +260,7 @@ export default function Home() {
                 </Link>
 
                 <Link
-                  href="/assessment/career"
+                  href="/assessment/preferences"
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
                 >
                   Take Skill Assessment
@@ -435,10 +448,13 @@ export default function Home() {
                     {feature.description}
                   </p>
 
-                  <div className="mt-6 flex items-center gap-1 text-xs font-bold text-indigo-600">
+                  <Link
+                    href={feature.href}
+                    className="mt-6 inline-flex items-center gap-1 text-xs font-bold text-indigo-600 transition hover:text-indigo-700"
+                  >
                     Learn more
                     <ArrowRight className="h-3.5 w-3.5" />
-                  </div>
+                  </Link>
                 </motion.div>
               );
             })}
@@ -528,6 +544,176 @@ export default function Home() {
   );
 }
 
+const roleLabels: Record<string, string> = {
+  student: "Student",
+  industry: "Industry Professional",
+  academia: "Faculty",
+  institution: "Institution",
+  admin: "Administrator",
+};
+
+const roleLinks: Record<string, string> = {
+  student: "/dashboard",
+  industry: "/industry",
+  academia: "/academician",
+  institution: "/institution",
+  admin: "/admin",
+};
+
+function DetailField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+        {label}
+      </p>
+
+      <p className="mt-1 text-sm font-medium text-slate-900">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function LoggedInHome({
+  user,
+  profile,
+}: {
+  user: FirebaseUser;
+  profile: CampusUser | null;
+}) {
+  const role = profile?.role || "student";
+
+  const firstName =
+    profile?.name?.split(" ")[0] ||
+    user.displayName?.split(" ")[0] ||
+    "there";
+
+  const initials = profile?.name
+    ? profile.name
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : (user.email?.[0]?.toUpperCase() ?? "U");
+
+  const avatar = profile?.photoUrl || user.photoURL;
+
+  return (
+    <main className="min-h-screen bg-[#f8fafc]">
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-8 lg:py-14">
+        <div className="mb-8 flex items-center gap-6">
+          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-700">
+            {avatar ? (
+              <Image
+                src={avatar}
+                alt={profile?.name || "avatar"}
+                fill
+                className="rounded-full object-cover"
+              />
+            ) : (
+              initials
+            )}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <h1 className="text-3xl font-bold text-slate-950">
+              Welcome back, {firstName}
+            </h1>
+
+            <p className="mt-1 truncate text-sm text-slate-500">
+              {profile?.email || user.email}
+            </p>
+          </div>
+
+          <div className="shrink-0">
+            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              {roleLabels[role] || role}
+            </span>
+          </div>
+        </div>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-600">
+            Your Profile
+          </h2>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <DetailField
+              label="Name"
+              value={profile?.name || user.displayName || "—"}
+            />
+            <DetailField
+              label="Email"
+              value={profile?.email || user.email || "—"}
+            />
+            {profile?.college && (
+              <DetailField label="College" value={profile.college} />
+            )}
+            {profile?.degree && (
+              <DetailField label="Degree" value={profile.degree} />
+            )}
+            {profile?.branch && (
+              <DetailField label="Branch" value={profile.branch} />
+            )}
+            {profile?.year && (
+              <DetailField label="Year" value={profile.year} />
+            )}
+            {profile?.careerRole && (
+              <DetailField label="Target Role" value={profile.careerRole} />
+            )}
+            {profile?.readiness !== undefined && (
+              <DetailField
+                label="Skill Readiness"
+                value={`${profile.readiness}%`}
+              />
+            )}
+            {profile?.placementStage && (
+              <DetailField
+                label="Placement Stage"
+                value={profile.placementStage}
+              />
+            )}
+            {profile?.companyName && (
+              <DetailField label="Company" value={profile.companyName} />
+            )}
+            {profile?.designation && (
+              <DetailField label="Designation" value={profile.designation} />
+            )}
+            {profile?.academiaProfile?.institution && (
+              <DetailField
+                label="Institution"
+                value={profile.academiaProfile.institution}
+              />
+            )}
+          </div>
+        </section>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href={roleLinks[role] || "/dashboard"}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700"
+          >
+            Open {roleLabels[role] || role} Dashboard
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+
+          {role === "student" && (
+            <Link
+              href="/assessment/preferences"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            >
+              Take Skill Assessment
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}
+
 function AuthActions() {
   const { user, logout } = useAuth();
 
@@ -594,7 +780,7 @@ function MobileMenu() {
               <MobileLink href="/dashboard" onSelect={() => setOpen(false)}>
                 Dashboard
               </MobileLink>
-              <MobileLink href="/assessment/career" onSelect={() => setOpen(false)}>
+              <MobileLink href="/assessment/preferences" onSelect={() => setOpen(false)}>
                 Assessment
               </MobileLink>
               <MobileLink href="/roadmap" onSelect={() => setOpen(false)}>

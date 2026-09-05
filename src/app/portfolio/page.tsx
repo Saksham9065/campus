@@ -297,7 +297,7 @@ function PassportContent() {
               <EmptyState
                 title="No skills assessed yet"
                 description="Complete your skill assessment to populate your Skill Passport."
-                href="/assessment/career"
+                 href="/assessment/preferences"
                 action="Take Assessment"
               />
             ) : (
