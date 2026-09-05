@@ -18,6 +18,7 @@ export type CampusUser = {
 
   careerRole?: string;
   careerRoles?: string[];
+  suggestedRole?: string;
 
   skillScores?: Record<string, number>;
   readiness?: number;

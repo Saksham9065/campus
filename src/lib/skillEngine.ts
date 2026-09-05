@@ -1,3 +1,5 @@
+import type { Question } from "@/lib/assessmentQuestions";
+
 export type SkillLevel =
   | "Beginner"
   | "Intermediate"
@@ -222,6 +224,132 @@ function getSkillImprovementDescription(
 
   return (
     descriptions[skill] ||
-    `Develop your ${skill} skills through focused learning and practical projects.`
+      `Develop your ${skill} skills through focused learning and practical projects.`
   );
+}
+
+export type AssessmentAttempt = {
+  total: number;
+  attempted: number;
+  correct: number;
+  wrong: number;
+  unattempted: number;
+  score: number;
+  accuracy: number;
+  attemptRate: number;
+};
+
+export type QuestionReport = {
+  id: string;
+  skill: string;
+  question: string;
+  options: string[];
+  selectedIndex: number | undefined;
+  correctIndex: number;
+  isCorrect: boolean;
+  isUnattempted: boolean;
+  marks: number;
+};
+
+const SKILL_ROLE_MAP: Record<string, string> = {
+  "Backend Engineering": "Backend Engineer",
+  "Backend Architecture": "Backend Engineer",
+  "Backend Operations": "Backend Engineer",
+  "Backend Reliability": "Backend Engineer",
+  "Backend Security": "Security Engineer",
+  "Frontend Engineering": "Frontend Developer",
+  "Frontend Performance": "Frontend Developer",
+  "Frontend UX": "Frontend Developer",
+  "Full Stack Performance": "Full Stack Developer",
+  "Full Stack Validation": "Full Stack Developer",
+  "Security": "Security Engineer",
+  "Database Engineering": "Data Engineer",
+  DevOps: "DevOps Engineer",
+  "AI System Design": "AI Engineer",
+  "AI Engineering": "AI Engineer",
+  "AI Evaluation": "AI/ML Specialist",
+  "AI & Search": "AI/Research Engineer",
+  "AI & Logic": "Data Scientist",
+  "AI Fundamentals": "AI Engineer",
+  "AI Security": "AI/ML Specialist",
+  "Data Structures": "Software Engineer",
+  "System Design": "Software Engineer",
+};
+
+export function calculateAssessmentScore(
+  answers: Record<string, number>,
+  questions: Question[]
+): AssessmentAttempt {
+  const total = questions.length;
+
+  const evaluated = questions.filter(
+    (q) => answers[q.id] === q.correct
+  );
+  const correct = evaluated.length;
+
+  const attempted = questions.filter((q) => {
+    const answered =
+      answers[q.id] !== undefined && answers[q.id] !== null;
+
+    return answered;
+  }).length;
+
+  const wrong = attempted - correct;
+  const unattempted = total - attempted;
+  const score =
+    total <= 0 ? 0 : Math.round((correct / total) * 100);
+  const attemptRate =
+    total <= 0 ? 0 : Math.round((attempted / total) * 100);
+
+  return {
+    total,
+    attempted,
+    correct,
+    wrong,
+    unattempted,
+    score,
+    accuracy: score,
+    attemptRate,
+  };
+}
+
+export function buildQuestionReport(
+  answers: Record<string, number>,
+  questions: Question[]
+): QuestionReport[] {
+  return questions.map((q) => {
+    const selectedIndex = answers[q.id];
+    const answered =
+      selectedIndex !== undefined && selectedIndex !== null;
+    const isCorrect = answered && selectedIndex === q.correct;
+
+    return {
+      id: q.id,
+      skill: q.skill,
+      question: q.question,
+      options: q.options,
+      selectedIndex,
+      correctIndex: q.correct,
+      isCorrect: Boolean(isCorrect),
+      isUnattempted: !answered,
+      marks: isCorrect ? 1 : 0,
+    };
+  });
+}
+
+export function suggestCareerRole(
+  skillResults: SkillResult[],
+  preferredRole = "Data Analyst"
+): string {
+  if (!skillResults.length) return preferredRole;
+
+  for (const skill of skillResults) {
+    if (skill.score >= 60 && SKILL_ROLE_MAP[skill.name]) {
+      return SKILL_ROLE_MAP[skill.name];
+    }
+  }
+
+  const top = skillResults[0];
+
+  return SKILL_ROLE_MAP[top.name] ?? preferredRole;
 }

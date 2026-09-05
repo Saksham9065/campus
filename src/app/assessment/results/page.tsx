@@ -13,6 +13,7 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  X,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -20,10 +21,15 @@ import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { getLatestAssessment } from "@/lib/firestoreAssessment";
 import {
+  buildQuestionReport,
+  calculateAssessmentScore,
   calculateReadiness,
   generateSkillResults,
   getSkillGaps,
   getTopSkills,
+  suggestCareerRole,
+  type AssessmentAttempt,
+  type QuestionReport,
   type SkillResult,
 } from "@/lib/skillEngine";
 
@@ -32,6 +38,10 @@ function ResultsContent() {
 
   const [skills, setSkills] = useState<SkillResult[]>([]);
   const [readiness, setReadiness] = useState(0);
+  const [attempt, setAttempt] =
+    useState<AssessmentAttempt | null>(null);
+  const [reports, setReports] = useState<QuestionReport[]>([]);
+  const [suggestedRole, setSuggestedRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -60,6 +70,35 @@ function ResultsContent() {
 
         setSkills(results);
         setReadiness(calculatedReadiness);
+
+        const computedAttempt =
+          assessment.questions && assessment.answers
+            ? calculateAssessmentScore(
+                assessment.answers,
+                assessment.questions
+              )
+            : null;
+
+        if (computedAttempt) {
+          setReadiness(computedAttempt.score);
+        }
+
+        setAttempt(computedAttempt);
+
+        setReports(
+          assessment.questions &&
+            assessment.questions.length
+            ? buildQuestionReport(
+                assessment.answers,
+                assessment.questions
+              )
+            : []
+        );
+
+        setSuggestedRole(
+          assessment.suggestedRole ||
+            suggestCareerRole(results, profile?.careerRole)
+        );
       } catch (error) {
         console.error(error);
       } finally {
@@ -165,6 +204,54 @@ function ResultsContent() {
                     style={{ width: `${readiness}%` }}
                   />
                 </div>
+
+                <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-center">
+                    <p className="text-[10px] font-medium text-slate-400">
+                      Attempted
+                    </p>
+                    <p className="mt-0.5 text-xl font-bold text-white">
+                      {attempt ? `${attempt.attempted}/${attempt.total}` : "—"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-center">
+                    <p className="text-[10px] font-medium text-slate-400">
+                      Correct
+                    </p>
+                    <p className="mt-0.5 text-xl font-bold text-emerald-300">
+                      {attempt ? attempt.correct : "—"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-center">
+                    <p className="text-[10px] font-medium text-slate-400">
+                      Wrong
+                    </p>
+                    <p className="mt-0.5 text-xl font-bold text-rose-300">
+                      {attempt ? attempt.wrong : "—"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-center">
+                    <p className="text-[10px] font-medium text-slate-400">
+                      Attempt rate
+                    </p>
+                    <p className="mt-0.5 text-xl font-bold text-white">
+                      {attempt ? `${attempt.attemptRate}%` : "—"}
+                    </p>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs text-slate-300">
+                  Marks:{" "}
+                  <span className="font-bold">
+                    {attempt
+                      ? `${attempt.correct} / ${attempt.total}`
+                      : "—"}
+                  </span>
+                </p>
+
               </div>
 
               <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
@@ -198,6 +285,18 @@ function ResultsContent() {
                   View personalized roadmap
                   <ArrowRight className="h-4 w-4" />
                 </Link>
+
+                <div className="mt-5 flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3">
+                  <Sparkles className="h-5 w-5 text-indigo-600" />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">
+                      Suggested role
+                    </p>
+                    <p className="mt-0.5 text-lg font-bold text-slate-900">
+                      {suggestedRole ?? profile?.careerRole ?? "Data Analyst"}
+                    </p>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -325,6 +424,46 @@ function ResultsContent() {
               </div>
             </section>
 
+            {/* Question Review */}
+            <section className="mt-6">
+              <div className="flex items-end justify-between gap-2">
+                <div>
+                  <p className="text-sm font-bold text-indigo-600">
+                    Question Review
+                  </p>
+                  <h2 className="mt-1 text-2xl font-black text-slate-950">
+                    Your answers, reviewed
+                  </h2>
+                </div>
+                {attempt && (
+                  <p className="text-sm font-bold text-slate-600">
+                    {attempt.correct} / {attempt.total} correct
+                  </p>
+                )}
+              </div>
+
+              {reports.length === 0 ? (
+                <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
+                  <Brain className="mx-auto h-10 w-10 text-slate-300" />
+                  <p className="mt-4 font-bold text-slate-800">
+                    No question review available
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Complete the assessment again to see your answers reviewed.
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-5 space-y-4">
+                  {reports.map((report) => (
+                    <QuestionReview
+                      key={report.id}
+                      report={report}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+
             {/* Actions */}
             <section className="mt-6 grid gap-4 sm:grid-cols-3">
               <ActionCard
@@ -429,6 +568,95 @@ function BriefcaseIcon(props: React.SVGProps<SVGSVGElement> & { className?: stri
       <rect width="20" height="14" x="2" y="7" rx="2" />
       <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
     </svg>
+  );
+}
+
+function QuestionReview({
+  report,
+}: {
+  report: QuestionReport;
+}) {
+  const labels = ["A", "B", "C", "D"];
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">
+          {report.skill}
+        </span>
+
+        <span
+          className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+            report.isUnattempted
+              ? "border border-slate-200 bg-slate-50 text-slate-500"
+              : report.isCorrect
+              ? "bg-emerald-50 text-emerald-700"
+              : "bg-rose-50 text-rose-700"
+          }`}
+        >
+          {report.isUnattempted
+            ? "Not attempted - 0 / 1 mark"
+            : report.isCorrect
+            ? "Correct - 1 / 1 mark"
+            : "Wrong - 0 / 1 mark"}
+        </span>
+      </div>
+
+      <p className="mt-3 text-sm font-semibold text-slate-950">
+        {report.question}
+      </p>
+
+      <div className="mt-3 space-y-2">
+        {report.options.map((option, index) => {
+          const isSelected =
+            report.selectedIndex === index;
+          const isCorrectOption =
+            report.correctIndex === index;
+          const isWrongSelected =
+            isSelected && !report.isCorrect;
+
+          return (
+            <div
+              key={index}
+              className={`flex items-center gap-3 rounded-xl border p-3 text-sm ${
+                isCorrectOption
+                  ? "border-emerald-200 bg-emerald-50"
+                  : isWrongSelected
+                  ? "border-rose-200 bg-rose-50"
+                  : isSelected
+                  ? "border-indigo-200 bg-indigo-50"
+                  : "border-slate-200"
+              }`}
+            >
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
+                  isCorrectOption
+                    ? "bg-emerald-100 text-emerald-700"
+                    : isWrongSelected
+                    ? "bg-rose-100 text-rose-700"
+                    : isSelected
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "bg-slate-100 text-slate-400"
+                }`}
+              >
+                {labels[index] ?? String(index + 1)}
+              </span>
+
+              <span className="flex-1 text-slate-700">
+                {option}
+              </span>
+
+              {isCorrectOption && (
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              )}
+              {isWrongSelected && (
+                <X className="h-4 w-4 text-rose-600" />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

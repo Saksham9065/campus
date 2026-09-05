@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import type { Question } from "@/lib/assessmentQuestions";
+import type { AssessmentAttempt } from "@/lib/skillEngine";
 
 export type AssessmentData = {
   studentId: string;
@@ -18,6 +20,9 @@ export type AssessmentData = {
   score: number;
   total: number;
   skillScores: Record<string, number>;
+  questions?: Question[];
+  attempt?: AssessmentAttempt;
+  suggestedRole?: string;
 };
 
 export async function saveAssessment(

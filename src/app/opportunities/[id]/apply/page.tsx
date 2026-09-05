@@ -114,11 +114,6 @@ function ApplyPageContent({
 
     if (!user || !opportunity) return;
 
-    if (!profile?.resumeUrl) {
-      setError("Please upload your resume before applying.");
-      return;
-    }
-
     setError("");
     setSubmitting(true);
 
@@ -348,7 +343,7 @@ function ApplyPageContent({
 
                     <p className="text-[11px] text-slate-400">
                       {profile?.resumeName ||
-                        "No resume uploaded"}
+                        "No resume uploaded (optional)"}
                     </p>
                   </div>
                 </div>
@@ -358,7 +353,7 @@ function ApplyPageContent({
                     href="/profile"
                     className="mt-3 inline-flex text-[11px] font-bold text-indigo-600"
                   >
-                    Upload resume first →
+                    Upload resume →
                   </Link>
                 )}
               </div>
@@ -370,7 +365,7 @@ function ApplyPageContent({
               )}
 
               <button
-                disabled={submitting || !profile?.resumeUrl}
+                disabled={submitting}
                 type="submit"
                 className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
               >

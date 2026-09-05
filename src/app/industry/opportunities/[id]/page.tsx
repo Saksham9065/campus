@@ -3,6 +3,7 @@
 import { use } from "react";
 import {
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -74,7 +75,13 @@ function ManageOpportunityContent({
   const [deleting, setDeleting] =
     useState(false);
 
+  const unsubscribeRef = useRef<
+    (() => void) | undefined
+  >(undefined);
+
   useEffect(() => {
+    let cancelled = false;
+
     async function loadOpportunity() {
       if (!user) return;
 
@@ -83,6 +90,8 @@ function ManageOpportunityContent({
           await getIndustryOpportunities(
             user.uid
           );
+
+        if (cancelled) return;
 
         const found =
           opportunities.find(
@@ -96,30 +105,31 @@ function ManageOpportunityContent({
           subscribeToOpportunityApplications(
             opportunityId,
             (data) => {
+              if (cancelled) return;
               setApplications(data);
               setLoading(false);
             }
           );
 
-        return unsubscribe;
+        if (cancelled) {
+          unsubscribe();
+        } else {
+          unsubscribeRef.current = unsubscribe;
+        }
       } catch (error) {
-        console.error(error);
-        setLoading(false);
+        if (!cancelled) {
+          console.error(error);
+          setLoading(false);
+        }
       }
     }
 
-    let unsubscribe:
-      | (() => void)
-      | undefined;
-
-    loadOpportunity().then(
-      (cleanup) => {
-        unsubscribe = cleanup;
-      }
-    );
+    loadOpportunity();
 
     return () => {
-      unsubscribe?.();
+      cancelled = true;
+      unsubscribeRef.current?.();
+      unsubscribeRef.current = undefined;
     };
   }, [user, opportunityId]);
 

@@ -17,7 +17,10 @@ import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { saveAssessment } from "@/lib/firestoreAssessment";
 import {
+  calculateAssessmentScore,
   calculateSkillScore,
+  generateSkillResults,
+  suggestCareerRole,
 } from "@/lib/skillEngine";
 import { updateUserProfile } from "@/lib/users";
 import {
@@ -190,19 +193,33 @@ function QuestionsContent() {
         total
       );
 
+      const attempt = calculateAssessmentScore(
+        answers,
+        questions
+      );
+
+      const skillResults =
+        generateSkillResults(skillScores);
+      const suggestedRole =
+        suggestCareerRole(skillResults, role);
+
       await saveAssessment({
         studentId: user.uid,
         roles: [role],
         answers,
+        questions,
         score,
         total,
         skillScores,
+        attempt,
+        suggestedRole,
       });
 
       await updateUserProfile(user.uid, {
         skillScores,
         readiness,
         careerRole: role,
+        suggestedRole,
       });
 
       router.replace(
