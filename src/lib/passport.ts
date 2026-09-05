@@ -2,7 +2,6 @@ import {
   addDoc,
   collection,
   doc,
-  getDoc,
   getDocs,
   limit,
   query,
@@ -104,16 +103,23 @@ export async function getPassportByStudent(
 export async function getPassportById(
   passportId: string
 ): Promise<SkillPassport | null> {
-  const passportRef = doc(db, "skillPassports", passportId);
-  const snapshot = await getDoc(passportRef);
+  const passportQuery = query(
+    collection(db, "skillPassports"),
+    where("passportId", "==", passportId),
+    limit(1)
+  );
 
-  if (!snapshot.exists()) {
+  const snapshot = await getDocs(passportQuery);
+
+  if (snapshot.empty) {
     return null;
   }
 
+  const item = snapshot.docs[0];
+
   return {
-    id: snapshot.id,
-    ...(snapshot.data() as Omit<SkillPassport, "id">),
+    id: item.id,
+    ...(item.data() as Omit<SkillPassport, "id">),
   };
 }
 

@@ -54,7 +54,7 @@ function PassportContent() {
 
         setPassport(result);
         setVerificationUrl(
-          `${window.location.origin}/verify/${result.passportId}`
+          `${window.location.origin}/verify/passport/${result.passportId}`
         );
       } catch (err) {
         console.error(err);
