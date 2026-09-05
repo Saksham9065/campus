@@ -30,6 +30,13 @@ import {
   type AcademiaOpportunity,
 } from "@/lib/academia";
 
+import { getOpenOpportunities } from "@/lib/firestoreOpportunities";
+import type { JobOpportunity } from "@/lib/jobMatcher";
+
+type DashboardOpportunity =
+  | (AcademiaOpportunity & { source: "academia" })
+  | (JobOpportunity & { source: "industry" });
+
 export default function AcademicianPage() {
   return (
     <ProtectedRoute allowedRoles={["academia"]}>
@@ -42,7 +49,7 @@ function AcademicianDashboard() {
   const { logout, profile } = useAuth();
 
   const [opportunities, setOpportunities] = useState<
-    AcademiaOpportunity[]
+    DashboardOpportunity[]
   >([]);
 
   const [applications, setApplications] = useState<
@@ -57,13 +64,23 @@ function AcademicianDashboard() {
       if (!profile) return;
 
       try {
-        const [opportunityData, applicationData] =
+        const [industryData, academiaData, applicationData] =
           await Promise.all([
+            getOpenOpportunities(),
             getOpenAcademiaOpportunities(),
             getAcademicianApplications(profile.uid),
           ]);
 
-        setOpportunities(opportunityData);
+        setOpportunities([
+          ...industryData.map((item) => ({
+            ...item,
+            source: "industry",
+          })),
+          ...academiaData.map((item) => ({
+            ...item,
+            source: "academia",
+          })),
+        ] as DashboardOpportunity[]);
         setApplications(applicationData);
       } catch (error) {
         console.error(error);
@@ -80,17 +97,31 @@ function AcademicianDashboard() {
 
     if (!term) return opportunities;
 
-    return opportunities.filter((item) =>
-      [
-        item.title,
-        item.organization,
-        item.type,
-        ...item.requiredExpertise,
-      ]
+    return opportunities.filter((item) => {
+      const searchable =
+        item.source === "industry"
+          ? [
+              item.title,
+              item.company,
+              item.type,
+              ...item.requiredSkills,
+              item.mode,
+            ]
+          : [
+              item.title,
+              item.organization,
+              item.type,
+              ...item.requiredExpertise,
+              ...item.preferredExpertise,
+              item.mode,
+              item.duration,
+            ];
+
+      return searchable
         .join(" ")
         .toLowerCase()
-        .includes(term)
-    );
+        .includes(term);
+    });
   }, [opportunities, search]);
 
   const selected = applications.filter(
@@ -390,17 +421,26 @@ function Category({
 function OpportunityCard({
   opportunity,
 }: {
-  opportunity: AcademiaOpportunity;
+  opportunity: DashboardOpportunity;
 }) {
+  const isIndustry =
+    opportunity.source === "industry";
+
   return (
     <Link
-      href={`/academician/opportunities/${opportunity.id}`}
+      href={
+        isIndustry
+          ? `/opportunities/${opportunity.id}/apply`
+          : `/academician/opportunities/${opportunity.id}`
+      }
       className="group rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
           <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">
-            {opportunity.type}
+            {isIndustry
+              ? "Industry"
+              : opportunity.type}
           </span>
 
           <h3 className="mt-4 font-black">
@@ -408,7 +448,9 @@ function OpportunityCard({
           </h3>
 
           <p className="mt-1 text-sm text-slate-500">
-            {opportunity.organization}
+            {isIndustry
+              ? opportunity.company
+              : opportunity.organization}
           </p>
         </div>
 
@@ -416,7 +458,10 @@ function OpportunityCard({
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
-        {opportunity.requiredExpertise
+        {(isIndustry
+          ? opportunity.requiredSkills
+          : opportunity.requiredExpertise
+        )
           .slice(0, 4)
           .map((skill) => (
             <span
@@ -432,7 +477,13 @@ function OpportunityCard({
         <span>{opportunity.mode}</span>
 
         <span>
-          {opportunity.duration || "Flexible duration"}
+          {isIndustry
+            ? opportunity.stipend ||
+              opportunity.salary ||
+              opportunity.location ||
+              "—"
+            : opportunity.duration ||
+              "Flexible duration"}
         </span>
       </div>
     </Link>
