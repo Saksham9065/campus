@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import TopNavbar from "@/components/TopNavbar";
 
 type Certificate = {
   certificateNumber: string;
@@ -59,16 +60,20 @@ export default function VerifyCertificatePage({
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50">
-        Loading verification...
+      <main className="flex min-h-screen flex-col bg-slate-50">
+        <TopNavbar />
+        <div className="flex flex-1 items-center justify-center">
+          Loading verification...
+        </div>
       </main>
     );
   }
 
   if (!certificate) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-5">
-        <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+      <main className="flex min-h-screen flex-col bg-slate-50 px-5">
+        <TopNavbar />
+        <div className="flex flex-1 items-center justify-center">
           <ShieldCheck className="mx-auto h-12 w-12 text-slate-300" />
 
           <h1 className="mt-5 text-xl font-bold">
@@ -91,7 +96,10 @@ export default function VerifyCertificatePage({
   }
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC] px-5 py-10">
+    <main className="flex min-h-screen flex-col bg-[#F8FAFC]">
+      <TopNavbar />
+
+      <div className="flex-1 px-5 py-10">
       <div className="mx-auto max-w-3xl">
         <Link
           href="/"
@@ -172,6 +180,7 @@ export default function VerifyCertificatePage({
           </div>
         </div>
       </div>
+    </div>
     </main>
   );
 }

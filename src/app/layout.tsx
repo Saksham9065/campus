@@ -6,7 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CopilotProvider } from "@/lib/copilotContext";
 import { CopilotWidget } from "@/components/CopilotWidget";
 
-import Footer from "@/components/Footer";
+import ConditionalFooter from "@/components/ConditionalFooter";
 
 export const metadata: Metadata = {
   title: "CampusLink — Skill Intelligence Platform",
@@ -30,7 +30,7 @@ export default function RootLayout({
             {children}
             <CopilotWidget />
           </CopilotProvider>
-          <Footer />
+          <ConditionalFooter />
         </AuthProvider>
       </body>
     </html>

@@ -19,6 +19,7 @@ import {
 import { getUserProfile } from "@/lib/users";
 import { loginUser } from "@/lib/auth";
 import type { UserRole } from "@/types";
+import TopNavbar from "@/components/TopNavbar";
 
 const roleRedirects: Record<UserRole, string> = {
   student: "/dashboard",
@@ -88,8 +89,10 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fafc]">
-      <div className="grid min-h-screen lg:grid-cols-[1fr_0.9fr]">
+    <main className="flex min-h-screen flex-col bg-[#f8fafc]">
+      <TopNavbar />
+
+      <div className="grid flex-1 lg:grid-cols-[1fr_0.9fr]">
         {/* LEFT */}
         <section className="relative hidden overflow-hidden bg-slate-950 lg:block">
           <div className="absolute -left-32 -top-32 h-125 w-125 rounded-full bg-indigo-600/20 blur-[120px]" />
