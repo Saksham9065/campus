@@ -31,11 +31,16 @@ import {
 } from "@/lib/academia";
 
 import { getOpenOpportunities } from "@/lib/firestoreOpportunities";
+import { getStudentApplications } from "@/lib/firestoreApplications";
 import type { JobOpportunity } from "@/lib/jobMatcher";
 
 type DashboardOpportunity =
   | (AcademiaOpportunity & { source: "academia" })
   | (JobOpportunity & { source: "industry" });
+
+type ApplicationForStats = {
+  status: string;
+};
 
 export default function AcademicianPage() {
   return (
@@ -53,7 +58,7 @@ function AcademicianDashboard() {
   >([]);
 
   const [applications, setApplications] = useState<
-    AcademiaApplication[]
+    ApplicationForStats[]
   >([]);
 
   const [loading, setLoading] = useState(true);
@@ -64,11 +69,12 @@ function AcademicianDashboard() {
       if (!profile) return;
 
       try {
-        const [industryData, academiaData, applicationData] =
+        const [industryData, academiaData, academiaApplications, studentApplications] =
           await Promise.all([
             getOpenOpportunities(),
             getOpenAcademiaOpportunities(),
             getAcademicianApplications(profile.uid),
+            getStudentApplications(profile.uid),
           ]);
 
         setOpportunities([
@@ -81,7 +87,18 @@ function AcademicianDashboard() {
             source: "academia",
           })),
         ] as DashboardOpportunity[]);
-        setApplications(applicationData);
+
+        const normalizedStudentApps: ApplicationForStats[] =
+          studentApplications.map((app) => ({
+            status: app.status,
+          }));
+
+        setApplications([
+          ...academiaApplications.map((app) => ({
+            status: app.status,
+          })),
+          ...normalizedStudentApps,
+        ]);
       } catch (error) {
         console.error(error);
       } finally {

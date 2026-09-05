@@ -494,7 +494,7 @@ function EmptyApplications() {
 
 export default function ApplicationsPage() {
   return (
-    <ProtectedRoute allowedRoles={["student"]}>
+    <ProtectedRoute allowedRoles={["student", "academia"]}>
       <ApplicationsContent />
     </ProtectedRoute>
   );

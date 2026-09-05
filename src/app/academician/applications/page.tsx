@@ -19,6 +19,19 @@ import {
   getAcademicianApplications,
   type AcademiaApplication,
 } from "@/lib/academia";
+import {
+  getStudentApplications,
+} from "@/lib/firestoreApplications";
+import type { Application } from "@/lib/applications";
+
+type UnifiedApplication = {
+  id: string;
+  opportunityTitle: string;
+  organization: string;
+  status: string;
+  coverLetter?: string;
+  appliedAt?: unknown;
+};
 
 export default function AcademiaApplicationsPage() {
   return (
@@ -32,7 +45,7 @@ function Applications() {
   const { user } = useAuth();
 
   const [items, setItems] = useState<
-    AcademiaApplication[]
+    UnifiedApplication[]
   >([]);
 
   const [loading, setLoading] = useState(true);
@@ -40,8 +53,55 @@ function Applications() {
   useEffect(() => {
     if (!user) return;
 
-    getAcademicianApplications(user.uid)
-      .then(setItems)
+    Promise.all([
+      getAcademicianApplications(user.uid),
+      getStudentApplications(user.uid),
+    ])
+      .then(([academiaApps, studentApps]) => {
+        const normalizedStudentApps: UnifiedApplication[] =
+          studentApps.map((app) => ({
+            id: app.id,
+            opportunityTitle: app.opportunityTitle,
+            organization: app.company,
+            status: app.status,
+            coverLetter: app.coverLetter,
+            appliedAt: app.appliedAt,
+          }));
+
+        const combined = [
+          ...academiaApps.map((app) => ({
+            id: app.id,
+            opportunityTitle: app.opportunityTitle,
+            organization: app.organization,
+            status: app.status,
+            coverLetter: app.coverLetter,
+            appliedAt: app.appliedAt,
+          })),
+          ...normalizedStudentApps,
+        ];
+
+        combined.sort((a, b) => {
+          const aTime =
+            a.appliedAt instanceof Date
+              ? a.appliedAt.getTime()
+              : a.appliedAt
+                ? new Date(
+                    a.appliedAt as string
+                  ).getTime()
+                : 0;
+          const bTime =
+            b.appliedAt instanceof Date
+              ? b.appliedAt.getTime()
+              : b.appliedAt
+                ? new Date(
+                    b.appliedAt as string
+                  ).getTime()
+                : 0;
+          return bTime - aTime;
+        });
+
+        setItems(combined);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [user]);
@@ -71,7 +131,7 @@ function Applications() {
             </h1>
 
             <p className="text-xs text-slate-500">
-              Track your collaboration applications
+              Track your applications across opportunities
             </p>
           </div>
         </div>
@@ -87,11 +147,11 @@ function Applications() {
             </h2>
 
             <p className="mt-2 text-sm text-slate-500">
-              Explore academia-industry opportunities to get started.
+              Explore opportunities to get started.
             </p>
 
             <Link
-              href="/academician/opportunities"
+              href="/opportunities"
               className="mt-5 inline-flex rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white"
             >
               Explore Opportunities

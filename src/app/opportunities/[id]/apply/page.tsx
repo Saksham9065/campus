@@ -123,7 +123,9 @@ function ApplyPageContent({
         studentName:
           profile?.name ||
           user.displayName ||
-          "Student",
+          (profile?.role === "academia"
+            ? "Academician"
+            : "Student"),
         studentEmail:
           profile?.email ||
           user.email ||
@@ -450,7 +452,7 @@ export default function ApplyPage({
   const { id } = use(params);
 
   return (
-    <ProtectedRoute allowedRoles={["student"]}>
+    <ProtectedRoute allowedRoles={["student", "academia"]}>
       <ApplyPageContent opportunityId={id} />
     </ProtectedRoute>
   );
