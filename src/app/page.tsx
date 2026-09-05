@@ -489,24 +489,38 @@ export default function Home() {
 
       {/* CTA */}
       <section className="px-4 py-24 sm:px-6">
-        <div className="mx-auto max-w-5xl overflow-hidden rounded-4xl bg-linear-to-br from-indigo-600 via-blue-600 to-cyan-500 px-7 py-14 text-center text-white shadow-2xl shadow-indigo-500/20 sm:px-14">
-          <ShieldCheck className="mx-auto h-9 w-9" />
+        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] border border-slate-200 bg-linear-to-br from-slate-50 via-indigo-50/50 to-cyan-50/50 px-7 py-14 text-center shadow-xl shadow-slate-200/50 sm:px-14">
+          {/* Decorative background elements */}
+          <div className="absolute -top-24 -right-20 h-80 w-80 rounded-full bg-linear-to-br from-indigo-300/20 via-blue-200/15 to-cyan-300/20 blur-3xl" />
 
-          <h2 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
-            Build the career you are ready for.
+          <div className="absolute -bottom-20 -left-24 h-72 w-72 rounded-full bg-linear-to-br from-purple-300/15 via-pink-200/10 to-rose-300/15 blur-3xl" />
+
+          <div className="absolute inset-0 opacity-[0.03]">
+            <div className="absolute top-10 left-10 h-2 w-2 rounded-full bg-indigo-400" />
+            <div className="absolute top-20 right-20 h-1.5 w-1.5 rounded-full bg-cyan-400" />
+            <div className="absolute bottom-14 left-20 h-2.5 w-2.5 rounded-full bg-indigo-300" />
+            <div className="absolute bottom-10 right-10 h-1.5 w-1.5 rounded-full bg-blue-400" />
+          </div>
+
+          <ShieldCheck className="relative mx-auto h-10 w-10 text-indigo-600" />
+
+          <h2 className="relative mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
+            <span className="text-slate-950">
+              Build the career you are ready for.
+            </span>
           </h2>
 
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-blue-100">
-            Start with your skill profile. CampusLink will help you understand
-            what comes next.
+          <p className="relative mx-auto mt-4 max-w-xl text-lg leading-6 text-slate-600">
+            Start with your skill profile. CampusLink will help you
+            understand what comes next.
           </p>
 
           <Link
             href="/signup"
-            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-indigo-700 shadow-xl transition hover:-translate-y-0.5"
+            className="relative mt-8 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:-translate-y-0.5 hover:bg-indigo-700"
           >
             Start Your Journey
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
           </Link>
         </div>
       </section>
